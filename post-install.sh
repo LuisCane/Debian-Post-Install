@@ -16,9 +16,12 @@ This script contains functions that require root privilages.\n'
         case $yn in
             [Yy]* ) Proceeding;
             RootCheck;
-            return 0;;
-            [Nn]* ) GoodBye;;
-            * ) echo 'Please answer yes or no.';;
+            return 0
+            ;;
+            [Nn]* ) GoodBye
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
         esac
     done
 }
@@ -48,9 +51,12 @@ RootCheck() {
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) Proceeding;
-            return 0;;
-            [Nn]* ) GoodBye;;
-            * ) echo 'Please answer yes or no.';;
+            return 0
+            ;;
+            [Nn]* ) GoodBye
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
         esac
     done
 }
@@ -61,7 +67,7 @@ CheckForPackage() {
     REQUIRED_PKG=$1
     PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
     echo Checking for $REQUIRED_PKG: $PKG_OK
-    if [ "" = "$PKG_OK" ]; then
+    if [ "install ok installed" = "$PKG_OK" ]; then
       return 0
     else
       return 1
@@ -74,7 +80,7 @@ UpdateSoftware() {
       printf '\nUpdating Software.\nNote: To Update Flatpak software, run this script without root or sudo.\n'
       UpdateApt;
       UpdateSnap;
-    elif ! CheckForPackage flatpak; then
+    elif CheckForPackage flatpak; then
       UpdateFlatpak;
     else   
       printf '\nSkipping Updates'
@@ -91,9 +97,12 @@ UpdateApt () {
         case $yn in
             [Yy]* ) apt update;
             check_exit_status 
-            break;;
-            [Nn]* ) break;;
-            * ) echo 'Please answer yes or no.';;
+            break
+            ;;
+            [Nn]* ) break
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
         esac
     done
     while true; do
@@ -108,25 +117,31 @@ UpdateApt () {
             check_exit_status
             apt -y autoclean;
             check_exit_status
-            break;;
-            [Nn]* ) break;;
-            * ) echo 'Please answer yes or no.';;
+            break
+            ;;
+            [Nn]* ) break
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
         esac
     done
 }
 #Update Snap packages
 UpdateSnap() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage snapd; then
+    if CheckForPackage snapd; then
         while true; do
         read -p $'Would you like to update the Snap Packages? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) snap refresh;
             check_exit_status 
-            break;;
-            [Nn]* ) break;;
-            * ) echo 'Please answer yes or no.';;
+            break
+            ;;
+            [Nn]* ) break
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
         esac
     done
     else
@@ -137,16 +152,19 @@ UpdateSnap() {
 #Update Flatpak packages
 UpdateFlatpak() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage flatpak; then
+    if CheckForPackage flatpak; then
         while true; do
         read -p $'Would you like to update the Flatpak Packages? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) flatpak update;
             check_exit_status 
-            break;;
-            [Nn]* ) break;;
-            * ) echo 'Please answer yes or no.';;
+            break
+            ;;
+            [Nn]* ) break
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
         esac
         done
     else
@@ -154,11 +172,63 @@ UpdateFlatpak() {
     fi
 }
 
+#CreateUsers
+CreateUsers() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if IsRoot; then 
+        printf '\nWould you like to add users? [y/N]'
+        read -r yn
+        yn=${yn:-N}
+        case $yn in
+            [Yy]* ) AddUsers
+                while true; do
+                printf '\nWould you like to add another user? [y/N]'
+                read -r yn
+                yn=${yn:-N}
+                case $yn in
+                    [Yy]* ) AddUsers
+                    ;;
+                    [Nn]* ) break
+                    ;;
+                    * ) echo 'Please answer yes or no.'
+                    ;;
+                esac
+                done
+            ;;
+            [Nn]* ) 
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
+        esac
+    fi
+}
+
 #AddUsers
 AddUsers() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
-    if IsRoot; then 
-        printf "addusers\n"
+    definedusername=''
+    printf '\nEnter username: '
+    read definedusername
+    useradd -m -s /bin/bash $definedusername 
+    passwd $definedusername
+    MakeUserSudo
+}
+
+#Add Defined User to Sudo group
+MakeUserSudo() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if CheckForPackage sudo; then
+        printf '\nWould you like to add this user to the sudo group? [y/N]'
+        read -r yn
+        yn=${yn:-N}
+        case $yn in
+            [Yy]* ) usermod -aG sudo $definedusername
+            ;;
+            [Nn]* ) 
+            ;;
+            * ) echo 'Please answer yes or no.'
+            ;;
+        esac
     fi
 }
 
@@ -173,9 +243,11 @@ InstallPKG() {
                 [Yy]* ) printf '\nInstalling %s\n' "$1"
                         apt install -y $1
                         check_exit_status;
-                        return 0;;
+                        return 0
+                        ;;
                 [Nn]* ) printf '\nSkipping %s\n' "$1"
-                        return 0;;
+                        return 0
+                        ;;
                     * ) printf '\nPlease enter yes or no.\n'
                         ;;
             esac
@@ -195,9 +267,11 @@ InstallSnapd() {
                 [Yy]* ) printf '\nInstalling %s\n' "snapd"
                         apt install -y snapd
                         check_exit_status;
-                        return 0;;
+                        return 0
+                        ;;
                 [Nn]* ) printf '\nSkipping %s\n' "snapd"
-                        return 0;;
+                        return 0
+                        ;;
                     * ) printf '\nPlease enter yes or no.\n'
                         ;;
             esac
@@ -218,9 +292,11 @@ InstallFlatpak() {
                         apt install -y flatpak
                         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo;
                         check_exit_status;
-                        return 0;;
+                        return 0
+                        ;;
                 [Nn]* ) printf '\nSkipping %s\n' "flatpak"
-                        return 0;;
+                        return 0
+                        ;;
                     * ) printf '\nPlease enter yes or no.\n'
                         ;;
             esac
@@ -242,9 +318,12 @@ check_exit_status() {
         read -p $"The last command exited with an error. Exit script? (y/N) " yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) GoodBye;;
-            [Nn]* ) break;;
-            *) echo 'Please answer yes or no.';;
+            [Yy]* ) GoodBye
+            ;;
+            [Nn]* ) break
+            ;;
+            *) echo 'Please answer yes or no.'
+            ;;
         esac
     fi
 }
@@ -263,7 +342,7 @@ GoodBye() {
 }
 
 #Greeting
-UpdateSoftware
+#UpdateSoftware
 #InstallSudo
 #InstallVIM
 #InstallFlatpak
@@ -271,6 +350,6 @@ UpdateSoftware
 #InstallPKG sudo
 #InstallPKG vim
 #InstallPKG cowsay
-#AddUsers
+CreateUsers
 
 GoodBye
