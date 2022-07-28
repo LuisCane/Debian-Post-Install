@@ -192,7 +192,7 @@ printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAM
         case $yn in
             [Yy]* ) printf '\nInstalling apt package updates.\n'
             sleep1s
-            $PKGMGR upgrade;
+            $PKGMGR -y upgrade;
             check_exit_status
             $PKGMGR autoremove;
             check_exit_status
@@ -309,7 +309,30 @@ MakeUserSudo() {
         case $yn in
             [Yy]* ) usermod -aG sudo $definedusername
             ;;
-            [Nn]* ) 
+            [Nn]* ) printf '\nSkipping making user sudo.'
+            ;;
+            * ) printf '\nPlease answer yes or no.'
+            ;;
+        esac
+    else
+    printf '\nSudo is not installed, would you like to install it? [y/N]'
+        read -r yn
+        yn=${yn:-N}
+        case $yn in
+            [Yy]* ) InstallSudo
+                printf '\nWould you like to add this user to the sudo group? [y/N]'
+                read -r yn
+                yn=${yn:-N}
+                case $yn in
+                   [Yy]* ) usermod -aG sudo $definedusername
+                   ;;
+                   [Nn]* ) printf '\nSkipping making user sudo.'
+                   ;;
+                   * ) printf '\nPlease answer yes or no.'
+                   ;;
+                esac
+            ;;
+            [Nn]* ) printf '\nSkipping making user sudo.'
             ;;
             * ) printf '\nPlease answer yes or no.'
             ;;
@@ -348,8 +371,8 @@ CopyZshrcFile() {
         case $yn in
             [Yy]* ) rcfile=./rcfiles/zshrc
                     if [[ -f "$rcfile" ]]; then
-                    copy ./rcfiles/zshrc /root/.zshrc
-                    copy ./rcfiles/zshrc /home/$USER/.zshrc
+                    cp ./rcfiles/zshrc /root/.zshrc
+                    cp ./rcfiles/zshrc /home/$USER/.zshrc
                 else
                     printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
                 fi
