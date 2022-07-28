@@ -88,16 +88,21 @@ SetupNala() {
                     wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg > /dev/null;
                     apt update;
                     apt install nala;
-                    if [ $? -eq 1 ]; then
+                    if [ $? -eq 100 ]; then
                         apt install nala-legacy
-                        if [ $? -eq 1 ]; then
+                        if [ $? -eq 100 ]; then
                             printf '\nNala might not be supported on your specific distribution.'
                         else
-                            $PKGMGR=nala
+                            PKGMGR=nala
+                            export LC_ALL=C.UTF-8
+                            export LANG=C.UTF-8
                         fi
                     else
-                        $PKGMGR=nala
+                        PKGMGR=nala
+                        export LC_ALL=C.UTF-8
+                        export LANG=C.UTF-8
                     fi
+                    nala fetch
             ;;
             [Nn]* ) 
             ;;
@@ -110,9 +115,13 @@ SetupNala() {
 UpdateSoftware() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     if IsRoot; then
-      printf '\nUpdating Software.\nNote: To Update Flatpak software, run this script without root or sudo.\n'
-      UpdateApt;
-      UpdateSnap;
+        printf '\nUpdating Software.\nNote: To Update Flatpak software, run this script without root or sudo.\n'
+        if [[ '$PKGMGR' == 'nala' ]]; then
+            UpdateNala;
+        else
+            UpdateApt;
+        fi
+        UpdateSnap;
     elif CheckForPackage flatpak; then
       UpdateFlatpak;
     else   
@@ -159,6 +168,49 @@ UpdateApt () {
         esac
     done
 }
+
+#Update Apt Packages and repos with Nala
+UpdateNala() {
+printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    while true; do
+        read -p $'Would you like to update the apt repositories? [Y/n]' yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) $PKGMGR update;
+            check_exit_status 
+            break
+            ;;
+            [Nn]* ) break
+            ;;
+            * ) printf '\nPlease answer yes or no.'
+            ;;
+        esac
+    done
+    while true; do
+        read -p $'Would you like to install the apt software updates? [Y/n]' yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) printf '\nInstalling apt package updates.\n'
+            sleep1s
+            $PKGMGR upgrade;
+            check_exit_status
+            $PKGMGR autoremove;
+            check_exit_status
+            $PKGMGR autopurge;
+            check_exit_status
+            $PKGMGR clean;
+            check_exit_status
+            break
+            ;;
+            [Nn]* ) break
+            ;;
+            * ) printf '\nPlease answer yes or no.'
+            ;;
+        esac
+    done
+}
+
+
 #Update Snap packages
 UpdateSnap() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
@@ -272,7 +324,7 @@ SetupZSH() {
         printf "\nWould you like to setup to install ZSH? [y/N]" 
         read -r yn
         case $yn in
-            [Yy]* ) sudo $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
+            [Yy]* ) $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
             check_exit_status
             DefinedSHELL=/bin/zsh
             usermod --shell $DefinedSHELL root
@@ -294,7 +346,8 @@ CopyZshrcFile() {
         printf "\nWould you like to copy the zshrc file included with this script to your home directory?" 
         read -r yn
         case $yn in
-            [Yy]* ) if [[ -f "./rcfiles/zshrc"]]; then
+            [Yy]* ) rcfile=./rcfiles/zshrc
+                    if [[ -f "$rcfile" ]]; then
                     copy ./rcfiles/zshrc /root/.zshrc
                     copy ./rcfiles/zshrc /home/$USER/.zshrc
                 else
