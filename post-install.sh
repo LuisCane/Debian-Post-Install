@@ -116,7 +116,7 @@ UpdateSoftware() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     if IsRoot; then
         printf '\nUpdating Software.\nNote: To Update Flatpak software, run this script without root or sudo.\n'
-        if [[ '$PKGMGR' == 'nala' ]]; then
+        if [[ $PKGMGR == nala ]]; then
             UpdateNala;
         else
             UpdateApt;
