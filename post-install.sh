@@ -20,7 +20,7 @@ This script contains functions that require root privilages.\n'
             ;;
             [Nn]* ) GoodBye
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
             ;;
         esac
     done
@@ -55,7 +55,7 @@ RootCheck() {
             ;;
             [Nn]* ) GoodBye
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
             ;;
         esac
     done
@@ -71,6 +71,39 @@ CheckForPackage() {
       return 0
     else
       return 1
+    fi
+}
+
+#Setup Nala as alternative package manager to Apt
+SetupNala() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if IsRoot; then
+        printf "\nNala is a front-end for apt with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
+        sleep 1s
+        printf "\nWould you like to install Nala? [y/N]"
+        read -p yn
+        yn=${yn:-N}
+        case $yn in
+            [Yy]* ) echo "deb http://deb.volian.org/volian/ scar main" | tee /etc/apt/sources.list.d/volian-archive-scar-unstable.list;
+                    wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg > /dev/null;
+                    apt update;
+                    apt install nala;
+                    if [ $? -eq 1 ]; then
+                        apt install nala-legacy
+                        if [ $? -eq 1 ]; then
+                            printf '\nNala might not be supported on your specific distribution.'
+                        else
+                            $PKGMGR=nala
+                        fi
+                    else
+                        $PKGMGR=nala
+                    fi
+            ;;
+            [Nn]* ) 
+            ;;
+            * ) printf '\nPlease answer yes or no.'
+        esac
+
     fi
 }
 
@@ -95,13 +128,13 @@ UpdateApt () {
         read -p $'Would you like to update the apt repositories? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) apt update;
+            [Yy]* ) $PKGMGR update;
             check_exit_status 
             break
             ;;
             [Nn]* ) break
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
             ;;
         esac
     done
@@ -111,17 +144,17 @@ UpdateApt () {
         case $yn in
             [Yy]* ) printf '\nInstalling apt package updates.\n'
             sleep1s
-            apt -y dist-upgrade --allow-downgrades;
+            $PKGMGR -y dist-upgrade --allow-downgrades;
             check_exit_status
-            apt -y autoremove;
+            $PKGMGR -y autoremove;
             check_exit_status
-            apt -y autoclean;
+            $PKGMGR -y autoclean;
             check_exit_status
             break
             ;;
             [Nn]* ) break
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
             ;;
         esac
     done
@@ -140,7 +173,7 @@ UpdateSnap() {
             ;;
             [Nn]* ) break
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
             ;;
         esac
     done
@@ -163,7 +196,7 @@ UpdateFlatpak() {
             ;;
             [Nn]* ) break
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
             ;;
         esac
         done
@@ -190,14 +223,14 @@ CreateUsers() {
                     ;;
                     [Nn]* ) break
                     ;;
-                    * ) echo 'Please answer yes or no.'
+                    * ) printf '\nPlease answer yes or no.'
                     ;;
                 esac
                 done
             ;;
             [Nn]* ) 
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
             ;;
         esac
     fi
@@ -209,7 +242,7 @@ AddUsers() {
     definedusername=''
     printf '\nEnter username: '
     read definedusername
-    useradd -m -s /bin/bash $definedusername 
+    useradd -m -s $DefinedSHELL $definedusername 
     passwd $definedusername
     MakeUserSudo
 }
@@ -226,7 +259,51 @@ MakeUserSudo() {
             ;;
             [Nn]* ) 
             ;;
-            * ) echo 'Please answer yes or no.'
+            * ) printf '\nPlease answer yes or no.'
+            ;;
+        esac
+    fi
+}
+
+#SetupZSH
+SetupZSH() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if IsRoot; then
+        printf "\nWould you like to setup to install ZSH? [y/N]" 
+        read -r yn
+        case $yn in
+            [Yy]* ) sudo $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
+            check_exit_status
+            DefinedSHELL=/bin/zsh
+            usermod --shell $DefinedSHELL root
+            usermod --shell $DefinedSHELL $USER
+            CopyZshrcFile
+            ;;
+            [Nn]* )
+            ;;
+            * ) printf '\nPlease answer yes or no.'
+            ;;
+        esac
+    fi
+}
+
+#CopyZshrcFile
+CopyZshrcFile() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if IsRoot; then
+        printf "\nWould you like to copy the zshrc file included with this script to your home directory?" 
+        read -r yn
+        case $yn in
+            [Yy]* ) if [[ -f "./rcfiles/zshrc"]]; then
+                    copy ./rcfiles/zshrc /root/.zshrc
+                    copy ./rcfiles/zshrc /home/$USER/.zshrc
+                else
+                    printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
+                fi
+            ;;
+            [Nn]* ) printf "\nSkipping zshrc file."
+            ;;
+            * ) echo "Please answer yes or no"
             ;;
         esac
     fi
@@ -241,7 +318,7 @@ InstallPKG() {
             read -r yn
             case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "$1"
-                        apt install -y $1
+                        $PKGMGR install -y $1
                         check_exit_status;
                         return 0
                         ;;
@@ -265,7 +342,7 @@ InstallSnapd() {
             read -r yn
             case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "snapd"
-                        apt install -y snapd
+                        $PKGMGR install -y snapd
                         check_exit_status;
                         return 0
                         ;;
@@ -289,7 +366,7 @@ InstallFlatpak() {
             read -r yn
             case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "flatpak"
-                        apt install -y flatpak
+                        $PKGMGR install -y flatpak
                         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo;
                         check_exit_status;
                         return 0
@@ -309,8 +386,7 @@ InstallFlatpak() {
 #check process for errors and prompt user to exit script if errors are detected.
 check_exit_status() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
-    if [ $? -eq 0 ]
-    then
+    if [ $? -eq 0 ]; then
         printf '\nSuccess\n'
     else
         printf '\nError\n'
@@ -322,7 +398,7 @@ check_exit_status() {
             ;;
             [Nn]* ) break
             ;;
-            *) echo 'Please answer yes or no.'
+            *) printf '\nPlease answer yes or no.'
             ;;
         esac
     fi
@@ -341,15 +417,20 @@ GoodBye() {
     exit
 }
 
-#Greeting
-#UpdateSoftware
-#InstallSudo
-#InstallVIM
-#InstallFlatpak
-#InstallSnapd
-#InstallPKG sudo
-#InstallPKG vim
-#InstallPKG cowsay
+Greeting
+PKGMGR=apt
+DefinedSHELL=/bin/bash
+
+SetupNala
+UpdateSoftware
+SetupZSH
+InstallSudo
+InstallVIM
+InstallFlatpak
+InstallSnapd
+InstallPKG sudo
+InstallPKG vim
+InstallPKG cowsay
 CreateUsers
 
 GoodBye
