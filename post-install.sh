@@ -406,7 +406,7 @@ InstallPKG() {
                         ;;
             esac
         else
-            printf '\nSkipping %s\n' "$1"
+            printf '\nSkipping %s, already installed.\n' "$1"
         fi
     fi
 }
@@ -430,7 +430,7 @@ InstallSnapd() {
                         ;;
             esac
         else
-            printf '\nSkipping %s\n' "snapd"
+            printf '\nSkipping %s, already installed.\n' "snapd"
         fi  
     fi
 }
@@ -455,7 +455,7 @@ InstallFlatpak() {
                         ;;
             esac
         else
-            printf '\nSkipping %s\n' "flatpak"
+            printf '\nSkipping %s, already installed.\n' "flatpak"
         fi
     fi
 }
