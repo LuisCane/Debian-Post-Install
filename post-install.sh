@@ -102,17 +102,7 @@ SetupNala() {
                         export LC_ALL=C.UTF-8
                         export LANG=C.UTF-8
                     fi
-                    printf '\nSelect your distribution.\n1. Debian\n2. Ubuntu\n3. Unsure (Default)'
-                    read -p OSrelease
-                    OSrelease=${123:-3}
-                    case $OSrelease in
-                        [1]* ) nala fetch --debian
-                        ;;
-                        [2]* ) nala fetch --ubuntu
-                        ;;
-                        [3]* ) nala fetch
-                        ;;
-                        * ) printf '\nPleaase Enter 1 2 or 3'
+                    nala fetch
             ;;
             [Nn]* ) 
             ;;
@@ -329,7 +319,7 @@ MakeUserSudo() {
         read -r yn
         yn=${yn:-N}
         case $yn in
-            [Yy]* ) InstallSudo
+            [Yy]* ) InstallPKG Sudo
                 printf '\nWould you like to add this user to the sudo group? [y/N]'
                 read -r yn
                 yn=${yn:-N}
@@ -382,6 +372,7 @@ CopyZshrcFile() {
             [Yy]* ) rcfile=./rcfiles/zshrc
                     if [[ -f "$rcfile" ]]; then
                     cp ./rcfiles/zshrc /root/.zshrc
+                    cp ./rcfiles/zshrc /etc/skel
                     cp ./rcfiles/zshrc /home/$USER/.zshrc
                 else
                     printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
@@ -399,7 +390,7 @@ CopyZshrcFile() {
 InstallPKG() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        if CheckForPackage $1; then
+        if ! CheckForPackage $1; then
             printf '\nWould you like to install %s? [y/n]' "$1"
             read -r yn
             case $yn in
@@ -423,7 +414,7 @@ InstallPKG() {
 InstallSnapd() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        if CheckForPackage snapd; then
+        if ! CheckForPackage snapd; then
             printf '\nWould you like to install %s? [y/n]' "snapd"
             read -r yn
             case $yn in
@@ -447,7 +438,7 @@ InstallSnapd() {
 InstallFlatpak() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        if CheckForPackage flatpak; then
+        if ! CheckForPackage flatpak; then
             printf '\nWould you like to install %s? [y/n]' "flatpak"
             read -r yn
             case $yn in
@@ -510,13 +501,11 @@ DefinedSHELL=/bin/bash
 SetupNala
 UpdateSoftware
 SetupZSH
-InstallSudo
-InstallVIM
+InstallPKG vim
 InstallFlatpak
 InstallSnapd
-InstallPKG sudo
-InstallPKG vim
 InstallPKG cowsay
 CreateUsers
+InstallPKG sudo
 
 GoodBye
