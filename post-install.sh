@@ -102,7 +102,17 @@ SetupNala() {
                         export LC_ALL=C.UTF-8
                         export LANG=C.UTF-8
                     fi
-                    nala fetch
+                    printf '\nSelect your distribution.\n1. Debian\n2. Ubuntu\n3. Unsure (Default)'
+                    read -p OSrelease
+                    OSrelease=${123:-3}
+                    case $OSrelease in
+                        [1]* ) nala fetch --debian
+                        ;;
+                        [2]* ) nala fetch --ubuntu
+                        ;;
+                        [3]* ) nala fetch
+                        ;;
+                        * ) printf '\nPleaase Enter 1 2 or 3'
             ;;
             [Nn]* ) 
             ;;
