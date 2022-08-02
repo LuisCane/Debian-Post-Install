@@ -459,6 +459,13 @@ InstallFlatpak() {
         fi
     fi
 }
+VMSetup() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+}
+
+DualBootSetup() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+}
 
 #check process for errors and prompt user to exit script if errors are detected.
 check_exit_status() {
@@ -494,6 +501,8 @@ GoodBye() {
     exit
 }
 
+
+
 Greeting
 PKGMGR=apt
 DefinedSHELL=/bin/bash
@@ -507,5 +516,8 @@ InstallSnapd
 InstallPKG cowsay
 CreateUsers
 InstallPKG sudo
+VMSetup
+DualBootSetup
+
 
 GoodBye
