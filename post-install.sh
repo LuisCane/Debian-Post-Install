@@ -64,6 +64,7 @@ RootCheck() {
 
 #Make sure script is being run from within the script's directory.
 ScriptDirCheck() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     DirCheckFile=./.dircheckfile
     if [[ -f "$DirCheckFile" ]]; then
         return 0
@@ -462,7 +463,8 @@ InstallFlatpak() {
 
 #Install Selected desktop Apt packages
 InstallAptDeskSW() {
-file='./apps/apt-desktop-apps'
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    file='./apps/apt-desktop-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
     read -r yne
@@ -483,6 +485,7 @@ file='./apps/apt-desktop-apps'
 
 #Install Selected server Apt packages
 InstallAptServSW() {
+printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
 file='./apps/apt-server-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
@@ -503,8 +506,8 @@ file='./apps/apt-server-apps'
 }
 
 #Install Selected Flatpak apps
-InstallFlatpakSW() {
-file='./apps/flatpak-apps'
+     InstallFlatpakSW() {
+    file='./apps/flatpak-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
     read -r yne
@@ -525,7 +528,8 @@ file='./apps/flatpak-apps'
 
 #Install Selected Snap packages
 InstallSnapSW() {
-file='./apps/snap-apps'
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    file='./apps/snap-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
     read -r yne
@@ -546,6 +550,7 @@ file='./apps/snap-apps'
 
 #Install Firestorm Second Life Viewer
 InstallFirestorm() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     printf '\nPlease ensure that the download link in ./apps/firestorm is the latest version. Press any key to continue.'
     read -rsn1
     file='./apps/firestorm'
