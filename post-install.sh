@@ -1,6 +1,7 @@
 #!/bin/bash
 Greeting () {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf '\nHello!'
     sleep 1s
     printf '\nWelcome to my post install script for debian\n and debian based distributions.'
@@ -30,6 +31,7 @@ This script contains functions that require root privilages.\n'
 #Check if User is Root.
 IsRoot() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if [[ $EUID = 0 ]]; then
       return 0
       else
@@ -40,6 +42,7 @@ IsRoot() {
 #Check for Root and inform user that the script has parts that require root and parts for non-root users.
 RootCheck() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then
         printf "\nThis script is being run as root.\n\nCertain parts of this script should be run as a non-root user or without sudo.\nRun the script again for those parts.\n"
         printf "For example if you install flatpak, the apps should be installed as user.\n"
@@ -65,6 +68,7 @@ RootCheck() {
 #Make sure script is being run from within the script's directory.
 ScriptDirCheck() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     DirCheckFile=./.dircheckfile
     if [[ -f "$DirCheckFile" ]]; then
         return 0
@@ -78,6 +82,7 @@ ScriptDirCheck() {
 #Check if apt package is installed.
 CheckForPackage() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     REQUIRED_PKG=$1
     PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
     echo Checking for $REQUIRED_PKG: $PKG_OK
@@ -91,6 +96,7 @@ CheckForPackage() {
 #Setup Nala as alternative package manager to Apt
 SetupNala() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     echo "deb http://deb.volian.org/volian/ scar main" | tee /etc/apt/sources.list.d/volian-archive-scar-unstable.list;
     wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg > /dev/null;
     apt update;
@@ -114,6 +120,7 @@ SetupNala() {
 
 UpdateSoftware() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then
         printf '\nUpdating Software.\nNote: To Update Flatpak software, run this script without root or sudo.\n'
         if [[ $PKGMGR == nala ]]; then
@@ -133,6 +140,7 @@ UpdateSoftware() {
 #Update and upgrade apt packages repos
 UpdateApt () {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     while true; do
         read -p $'Would you like to update the apt repositories? [Y/n]' yn
         yn=${yn:-Y}
@@ -172,6 +180,7 @@ UpdateApt () {
 #Update Apt Packages and repos with Nala
 UpdateNala() {
 printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+sleep 1s
     while true; do
         read -p $'Would you like to update the apt repositories? [Y/n]' yn
         yn=${yn:-Y}
@@ -214,6 +223,7 @@ printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAM
 #Update Snap packages
 UpdateSnap() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if CheckForPackage snapd; then
         while true; do
         read -p $'Would you like to update the Snap Packages? [Y/n]' yn
@@ -237,6 +247,7 @@ UpdateSnap() {
 #Update Flatpak packages
 UpdateFlatpak() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if CheckForPackage flatpak; then
         while true; do
         read -p $'Would you like to update the Flatpak Packages? [Y/n]' yn
@@ -260,6 +271,7 @@ UpdateFlatpak() {
 #CreateUsers
 CreateUsers() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then 
         printf '\nWould you like to add users? [y/N]'
         read -r yn
@@ -291,6 +303,7 @@ CreateUsers() {
 #AddUsers
 AddUsers() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     definedusername=''
     printf '\nEnter username: '
     read definedusername
@@ -302,6 +315,7 @@ AddUsers() {
 #Add Defined User to Sudo group
 MakeUserSudo() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if CheckForPackage sudo; then
         printf '\nWould you like to add this user to the sudo group? [y/N]'
         read -r yn
@@ -343,6 +357,7 @@ MakeUserSudo() {
 #SetupZSH
 SetupZSH() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then
         printf "\nWould you like to setup to install ZSH? [y/N]" 
         read -r yn
@@ -365,6 +380,7 @@ SetupZSH() {
 #CopyZshrcFile
 CopyZshrcFile() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then
         printf "\nWould you like to copy the zshrc file included with this script to your home directory?" 
         read -r yn
@@ -389,6 +405,7 @@ CopyZshrcFile() {
 #Install specified Package
 InstallPKG() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then
         if ! CheckForPackage $1; then
             printf '\nWould you like to install %s? [y/n]' "$1"
@@ -413,6 +430,7 @@ InstallPKG() {
 #Install specified Package
 InstallSnapd() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then
         if ! CheckForPackage snapd; then
             printf '\nWould you like to install %s? [y/n]' "snapd"
@@ -438,6 +456,7 @@ InstallSnapd() {
 #Install flatpak
 InstallFlatpak() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if IsRoot; then
         if ! CheckForPackage flatpak; then
             printf '\nWould you like to install %s? [y/n]' "flatpak"
@@ -464,6 +483,7 @@ InstallFlatpak() {
 #Install Selected desktop Apt packages
 InstallAptDeskSW() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
@@ -486,6 +506,7 @@ InstallAptDeskSW() {
 #Install Selected server Apt packages
 InstallAptServSW() {
 printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+sleep 1s
 file='./apps/apt-server-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
@@ -506,7 +527,9 @@ file='./apps/apt-server-apps'
 }
 
 #Install Selected Flatpak apps
-     InstallFlatpakSW() {
+    InstallFlatpakSW() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     file='./apps/flatpak-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
@@ -529,6 +552,7 @@ file='./apps/apt-server-apps'
 #Install Selected Snap packages
 InstallSnapSW() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     file='./apps/snap-apps'
     while read -r line <&3; do
     printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
@@ -551,6 +575,7 @@ InstallSnapSW() {
 #Install Firestorm Second Life Viewer
 InstallFirestorm() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf '\nPlease ensure that the download link in ./apps/firestorm is the latest version. Press any key to continue.'
     read -rsn1
     file='./apps/firestorm'
@@ -565,6 +590,7 @@ InstallFirestorm() {
 #Install Yubikey Packages
 InstallYubiSW() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf '\nInstalling Required Packages for yubikey authentication.'
     InstallPKG libpam-yubico
     InstallPKG libpam-u2f
@@ -575,6 +601,7 @@ InstallYubiSW() {
 #Set up Yubikey for One Time Password Authentication
 CreateYubikeyChalResp() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf '\nSetting up Challenge Response Authentication\n'
     printf '\nPlease Insert your yubikey and press any key to continue.'
     read -rsn1 -p
@@ -631,6 +658,7 @@ CreateYubikeyChalResp() {
 #Set up Yubikey for Challange Response Authentication
 CreateYubikeyOTP() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf '\nSetting up OTP (One Time Password) Authentication.\n'
     sleep1s
     authkeys=$USER
@@ -664,6 +692,7 @@ CreateYubikeyOTP() {
 #Copy Key files and PAM rules
 CPYubikeyFiles() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf 'Creating key directories and copying key files to appropriate locations. You may need to manually edit some files.'\
     sleep 1s
     mkdir -p /var/yubico
@@ -687,6 +716,7 @@ CPYubikeyFiles() {
 #Install Spice-vdagent for QEMU VMs
 VMSetup() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if ! CheckForPackage spice-vdagent; then
         printf '\nWould you like to install spice-vdagent for an improved VM desktop experience? [Y/n] '
         read -r yn
@@ -706,6 +736,7 @@ VMSetup() {
 #Install Refind for Dual Boot Systems
 DualBootSetup() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if ! CheckForPackage refind; then
         printf '\nRefind is a graphical bootloader that shows the icons of the installed operating systems.'
         printf '\nWould you like to install refind? [Y/n]'
@@ -725,6 +756,7 @@ DualBootSetup() {
 #check process for errors and prompt user to exit script if errors are detected.
 check_exit_status() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     if [ $? -eq 0 ]; then
         printf '\nSuccess\n'
     else
@@ -746,12 +778,14 @@ check_exit_status() {
 #Print Proceeding
 Proceeding() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf "\nProceeding\n"
 }
 
 #Print Goodbye and exit the script
 GoodBye() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
     printf "\nGoodbye.\n";
     exit
 }
@@ -957,11 +991,5 @@ case $yn in
     * ) AnswerYN
     ;;
 esac
-
-if IsRoot; then
-
-else
-
-fi
 
 GoodBye
