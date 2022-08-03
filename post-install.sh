@@ -804,7 +804,7 @@ PKGMGR=apt
 DefinedSHELL=/bin/bash
 
 #Setup Nala
-if ! CheckForPackage [ nala -o nala-legacy ]; then
+if ! CheckForPackage nala; then
     if IsRoot; then
         printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
         sleep 1s
@@ -876,14 +876,13 @@ if IsRoot; then
     read -r yn
     yn=${yn:-Y}
     case $yn in
-        [Yy]* ) InstallYubiSW;
-                CreateYubikeyOTP;
-                CreateYubikeyChalResp;
-                CPYubikeyFiles;
+        [Yy]* ) InstallYubiSW
+                CreateYubikeyOTP
+                CreateYubikeyChalResp
+                CPYubikeyFiles
                 return 0
         ;;
-        [Nn]* ) printf "\nSkipping Yubikey setup\n";
-                break
+        [Nn]* ) printf "\nSkipping Yubikey setup\n"
         ;;
         * ) echo 'Please answer yes or no.'
         ;;
@@ -892,12 +891,12 @@ fi
 
 #Install Recommended Apt Software
 if IsRoot; then
-    printf '\nWould you like to install apt packages? [Y/n]'
     printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest version of something, install it from flatpak.'
+    printf '\nWould you like to install apt packages? [Y/n]'
     read -r yn
     yn=${yn:-Y}
     case $yn in
-        [Yy]* ) printf '\nWould you like to install desktop apps?'
+        [Yy]* ) printf '\nWould you like to install desktop apps? [Y/n]'
                 read -r yn
                 yn=${yn:-Y}
                 case $yn in
@@ -908,7 +907,7 @@ if IsRoot; then
                     *) AnswerYN
                     ;;
                 esac
-                printf '\nWould you like to install server and CLI apps?'
+                printf '\nWould you like to install server and CLI apps? [Y/n]'
                 read -r yn
                 yn=${yn:-Y}
                 case $yn in
