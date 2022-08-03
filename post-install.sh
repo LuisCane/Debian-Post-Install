@@ -804,7 +804,15 @@ PKGMGR=apt
 DefinedSHELL=/bin/bash
 
 #Setup Nala
-if [! CheckForPackage nala] && [! CheckForPackage nala-legacy] ; then
+if CheckForPackage nala; then
+    PKGMGR=nala
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+elif CheckForPackage nala-legacy; then
+    PKGMGR=nala
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+else
     if IsRoot; then
         printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
         sleep 1s
