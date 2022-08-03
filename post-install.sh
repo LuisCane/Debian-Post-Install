@@ -822,6 +822,7 @@ if ! CheckForPackage [[nala -o nala-legacy]]
         PKGMGR=nala
         export LC_ALL=C.UTF-8
         export LANG=C.UTF-8
+    fi
 fi
 
 UpdateSoftware
@@ -884,8 +885,9 @@ if IsRoot; then
         [Nn]* ) printf "\nSkipping Yubikey setup\n";
                 break
         ;;
-        * ) echo 'Please answer yes or no.';;
-        esac
+        * ) echo 'Please answer yes or no.'
+        ;;
+    esac
 fi
 
 #Install Recommended Apt Software
