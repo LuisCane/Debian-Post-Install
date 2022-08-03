@@ -649,75 +649,75 @@ AnswerYN() {
 
 
 #Greet The User and Warn of using scripts that need root privilages.
-#Greeting
+Greeting
 PKGMGR=apt
 DefinedSHELL=/bin/bash
 
 #Setup Nala
-#if ! CheckForPackage [[nala -o nala-legacy]] 
-#    if IsRoot; then
-#        printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
-#        sleep 1s
-#        printf "\nWould you like to install Nala? [y/N]"
-#        read -p yn
-#        yn=${yn:-N}
-#        case $yn in
-#            [Yy]* ) SetupNala
-#            ;;
-#            [Nn]* ) 
-#            ;;
-#            * ) AnswerYN
-#        esac
-#    else
-#        PKGMGR=nala
-#        export LC_ALL=C.UTF-8
-#        export LANG=C.UTF-8
-#fi
+if ! CheckForPackage [[nala -o nala-legacy]] 
+    if IsRoot; then
+        printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
+        sleep 1s
+        printf "\nWould you like to install Nala? [y/N]"
+        read -p yn
+        yn=${yn:-N}
+        case $yn in
+            [Yy]* ) SetupNala
+            ;;
+            [Nn]* ) 
+            ;;
+            * ) AnswerYN
+        esac
+    else
+        PKGMGR=nala
+        export LC_ALL=C.UTF-8
+        export LANG=C.UTF-8
+fi
 
-#UpdateSoftware
+UpdateSoftware
 
-#SetupZSH
+SetupZSH
 
-#InstallPKG vim
+InstallPKG vim
 
-#InstallFlatpak
+InstallFlatpak
 
-#InstallSnapd
+InstallSnapd
 
-#CreateUsers
+CreateUsers
 
 
-#InstallPKG sudo
+InstallPKG sudo
 
 #Setup SpiceVD Agent for QEMU VMs.
-#if IsRoot; then
-#    printf '\nIs this system a QEMU based virtual machine? [y/N]'
-#    read -r yn
-#    yn=${yn:-Y}
-#        case $yn in
-#            [Yy]* ) VMSetup
-#            ;;
-#            [Nn]* ) printf '\nSkipping VM setup'
-#            ;;
-#            *) AnswerYN
-#            ;;
-#        esac
-#fi
+if IsRoot; then
+    printf '\nIs this system a QEMU based virtual machine? [y/N]'
+    read -r yn
+    yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) VMSetup
+            ;;
+            [Nn]* ) printf '\nSkipping VM setup'
+            ;;
+            *) AnswerYN
+            ;;
+        esac
+fi
 
 #Setup Refind for Dual Boot systems
-#if IsRoot; then
-#    printf '\nIs this system a dual boot system? [y/N]'
-#    read -r yn
-#    yn=${yn:-Y}
-#        case $yn in
-#            [Yy]* ) DualBootSetup
-#            ;;
-#            [Nn]* ) printf '\nSkipping DualBoot setup'
-#            ;;
-#            *) AnswerYN
-#            ;;
-#        esac
-#fi
+if IsRoot; then
+    printf '\nIs this system a dual boot system? [y/N]'
+    read -r yn
+    yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) DualBootSetup
+            ;;
+            [Nn]* ) printf '\nSkipping DualBoot setup'
+            ;;
+            *) AnswerYN
+            ;;
+        esac
+fi
 
 #Setup Yubikey Authentication
 if IsRoot; then
@@ -738,4 +738,4 @@ if IsRoot; then
         esac
 fi
 
-#GoodBye
+GoodBye
