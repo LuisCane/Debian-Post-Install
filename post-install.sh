@@ -15,6 +15,7 @@ This script contains functions that require root privilages.\n'
         yn=${yn:-N}
         case $yn in
             [Yy]* ) Proceeding;
+            ScriptDirCheck;
             RootCheck;
             return 0
             ;;
@@ -59,6 +60,18 @@ RootCheck() {
             ;;
         esac
     done
+}
+
+#Make sure script is being run from within the script's directory.
+ScriptDirCheck() {
+    DirCheckFile=./.dircheckfile
+    if [[ -f "$DirCheckFile" ]]; then
+        return 0
+    else
+        printf '\nThis script is being run from outside its intended directory. Please run this script from its main directory.'
+        GoodBye
+        exit
+    fi
 }
 
 #Check if apt package is installed.
@@ -406,6 +419,7 @@ InstallSnapd() {
             case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "snapd"
                         InstallPKG snapd
+                        snap install core
                         check_exit_status;
                         return 0
                         ;;
@@ -444,6 +458,103 @@ InstallFlatpak() {
             printf '\nSkipping %s, already installed.\n' "flatpak"
         fi
     fi
+}
+
+#Install Selected desktop Apt packages
+InstallAptDeskSW() {
+file='./apps/apt-desktop-apps'
+    while read -r line <&3; do
+    printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
+    read -r yne
+    yne=${yne:-Y}
+    case $yne in
+        [Yy]*) InstallPKG "$line"
+               check_exit_status
+        ;;
+        [Nn]*) printf '\nSkipping %s\n' "$line"
+        ;;
+        [Ee]*) break
+        ;;
+        *) AnswerYN 
+        ;;
+    esac
+  done 3< "$file"
+}
+
+#Install Selected server Apt packages
+InstallAptServSW() {
+file='./apps/apt-server-apps'
+    while read -r line <&3; do
+    printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
+    read -r yne
+    yne=${yne:-Y}
+    case $yne in
+        [Yy]*) InstallPKG "$line"
+               check_exit_status
+        ;;
+        [Nn]*) printf '\nSkipping %s\n' "$line"
+        ;;
+        [Ee]*) break
+        ;;
+        *) AnswerYN 
+        ;;
+    esac
+  done 3< "$file"
+}
+
+#Install Selected Flatpak apps
+InstallFlatpakSW() {
+file='./apps/flatpak-apps'
+    while read -r line <&3; do
+    printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
+    read -r yne
+    yne=${yne:-Y}
+    case $yne in
+        [Yy]*) flatpak install -y "$line"
+               check_exit_status
+        ;;
+        [Nn]*) printf '\nSkipping %s\n' "$line"
+        ;;
+        [Ee]*) break
+        ;;
+        *) AnswerYN 
+        ;;
+    esac
+  done 3< "$file"
+}
+
+#Install Selected Snap packages
+InstallSnapSW() {
+file='./apps/snap-apps'
+    while read -r line <&3; do
+    printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
+    read -r yne
+    yne=${yne:-Y}
+    case $yne in
+        [Yy]*) snap install -y "$line"
+               check_exit_status
+        ;;
+        [Nn]*) printf '\nSkipping %s\n' "$line"
+        ;;
+        [Ee]*) break
+        ;;
+        *) AnswerYN 
+        ;;
+    esac
+  done 3< "$file"
+}
+
+#Install Firestorm Second Life Viewer
+InstallFirestorm() {
+    printf '\nPlease ensure that the download link in ./apps/firestorm is the latest version. Press any key to continue.'
+    read -rsn1
+    file='./apps/firestorm'
+    read -r url < "$file"
+    wget $url
+    tar -xvf Phoenix_Firestorm-Release_x86_64*.tar.xz
+    chmod +x Phoenix_Firestorm*/install.sh
+    ./Phoenix_Firestorm*/install.sh
+    rm -r ./Phoenix_Firestorm*
 }
 
 #Install Yubikey Packages
@@ -736,6 +847,116 @@ if IsRoot; then
         ;;
         * ) echo 'Please answer yes or no.';;
         esac
+fi
+
+#Install Recommended Apt Software
+if IsRoot; then
+    printf '\nWould you like to install apt packages? [Y/n]'
+    printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest version of something, install it from flatpak.'
+    read -r yn
+    yn=${yn:-Y}
+    case $yn in
+        [Yy]* ) printf '\nWould you like to install desktop apps?'
+                read -r yn
+                yn=${yn:-Y}
+                case $yn in
+                    [Yy]*) InstallAptDeskSW
+                    ;;
+                    [Nn]*)
+                    ;;
+                    *) AnswerYN
+                    ;;
+                esac
+                printf '\nWould you like to install server and CLI apps?'
+                read -r yn
+                yn=${yn:-Y}
+                case $yn in
+                    [Yy]*) InstallAptServSW
+                    ;;
+                    [Nn]*)
+                    ;;
+                    *) AnswerYN
+                    ;;
+                esac
+        ;;
+        [Nn]* ) printf "\nSkipping apt packages\n"
+        ;;
+        * ) AnswerYN
+        ;;
+    esac
+fi
+
+#Install Recommended Flatpak Software
+if ! IsRoot; then
+    if CheckForPackage flatpak; then
+        printf '\nWould you like to install Flatpak apps? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) InstallFlatpakSW
+            ;;
+            [Nn]* ) printf "\nSkipping Flatpak apps\n"
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    else
+        printf '\nFlatpak is not installed. Skipping flatpak apps.'
+    fi
+else
+    printf '\nYou are running this script as root. To install Flatpak apps, you should run this script again without root or sudo.'
+fi
+
+#Install Recommended snap packages
+if IsRoot; then
+    if CheckForPackage snapd; then
+        printf '\nWould you like to install Snap packages? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) InstallSnapSW
+            ;;
+            [Nn]* ) printf "\nSkipping Snap apps\n"
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    else
+        printf '\nSnapd is not installed. Skipping Snap Packages.'
+    fi
+fi
+
+#Install Firestorm Viewer for Second Life
+printf '\nWould you like to install Firestorm Second Life Viewer? [y/N]'
+read -r yn
+yn=${yn:-Y}
+case $yn in
+    [Yy]* ) if IsRoot; then
+                InstallFirestorm
+            else
+                printf '\nYou are not root, installing firestorm as user will install to your home directory. Proceed? [Y/n]'
+                read -r yn
+                yn=${yn:-Y}
+                case $yn in
+                    [Yy]* ) InstallFirestorm
+                    ;;
+                    [Nn]* ) printf '\nSkipping Firestorm Installation.'
+                    ;;
+                    *) AnswerYN
+                    ;;
+                esac                
+            fi
+    ;;
+    [Nn]* ) printf '\nSkipping Firestorm Installation.'
+    ;;
+    * ) AnswerYN
+    ;;
+esac
+
+if IsRoot; then
+
+else
+
 fi
 
 GoodBye
