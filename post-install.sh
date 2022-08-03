@@ -20,7 +20,7 @@ This script contains functions that require root privilages.\n'
             ;;
             [Nn]* ) GoodBye
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     done
@@ -55,7 +55,7 @@ RootCheck() {
             ;;
             [Nn]* ) GoodBye
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     done
@@ -77,39 +77,25 @@ CheckForPackage() {
 #Setup Nala as alternative package manager to Apt
 SetupNala() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        printf "\nNala is a front-end for apt with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
-        sleep 1s
-        printf "\nWould you like to install Nala? [y/N]"
-        read -p yn
-        yn=${yn:-N}
-        case $yn in
-            [Yy]* ) echo "deb http://deb.volian.org/volian/ scar main" | tee /etc/apt/sources.list.d/volian-archive-scar-unstable.list;
-                    wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg > /dev/null;
-                    apt update;
-                    apt install nala;
-                    if [ $? -eq 100 ]; then
-                        apt install nala-legacy
-                        if [ $? -eq 100 ]; then
-                            printf '\nNala might not be supported on your specific distribution.'
-                        else
-                            PKGMGR=nala
-                            export LC_ALL=C.UTF-8
-                            export LANG=C.UTF-8
-                        fi
-                    else
-                        PKGMGR=nala
-                        export LC_ALL=C.UTF-8
-                        export LANG=C.UTF-8
-                    fi
-                    nala fetch
-            ;;
-            [Nn]* ) 
-            ;;
-            * ) printf '\nPlease answer yes or no.'
-        esac
-
+    echo "deb http://deb.volian.org/volian/ scar main" | tee /etc/apt/sources.list.d/volian-archive-scar-unstable.list;
+    wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg > /dev/null;
+    apt update;
+    apt install nala;
+    if [ $? -eq 100 ]; then
+        apt install nala-legacy
+        if [ $? -eq 100 ]; then
+            printf '\nNala might not be supported on your specific distribution.'
+        else
+            PKGMGR=nala
+            export LC_ALL=C.UTF-8
+            export LANG=C.UTF-8
+        fi
+    else
+        PKGMGR=nala
+        export LC_ALL=C.UTF-8
+        export LANG=C.UTF-8
     fi
+    nala fetch
 }
 
 UpdateSoftware() {
@@ -143,7 +129,7 @@ UpdateApt () {
             ;;
             [Nn]* ) break
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     done
@@ -163,7 +149,7 @@ UpdateApt () {
             ;;
             [Nn]* ) break
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     done
@@ -182,7 +168,7 @@ printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAM
             ;;
             [Nn]* ) break
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     done
@@ -204,7 +190,7 @@ printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAM
             ;;
             [Nn]* ) break
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     done
@@ -225,7 +211,7 @@ UpdateSnap() {
             ;;
             [Nn]* ) break
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     done
@@ -248,7 +234,7 @@ UpdateFlatpak() {
             ;;
             [Nn]* ) break
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
         done
@@ -275,14 +261,14 @@ CreateUsers() {
                     ;;
                     [Nn]* ) break
                     ;;
-                    * ) printf '\nPlease answer yes or no.'
+                    * ) AnswerYN
                     ;;
                 esac
                 done
             ;;
             [Nn]* ) 
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     fi
@@ -311,7 +297,7 @@ MakeUserSudo() {
             ;;
             [Nn]* ) printf '\nSkipping making user sudo.'
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     else
@@ -328,13 +314,13 @@ MakeUserSudo() {
                    ;;
                    [Nn]* ) printf '\nSkipping making user sudo.'
                    ;;
-                   * ) printf '\nPlease answer yes or no.'
+                   * ) AnswerYN
                    ;;
                 esac
             ;;
             [Nn]* ) printf '\nSkipping making user sudo.'
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     fi
@@ -356,7 +342,7 @@ SetupZSH() {
             ;;
             [Nn]* )
             ;;
-            * ) printf '\nPlease answer yes or no.'
+            * ) AnswerYN
             ;;
         esac
     fi
@@ -419,7 +405,7 @@ InstallSnapd() {
             read -r yn
             case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "snapd"
-                        $PKGMGR install -y snapd
+                        InstallPKG snapd
                         check_exit_status;
                         return 0
                         ;;
@@ -443,7 +429,7 @@ InstallFlatpak() {
             read -r yn
             case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "flatpak"
-                        $PKGMGR install -y flatpak
+                        InstallPKG flatpak
                         flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo;
                         check_exit_status;
                         return 0
@@ -459,12 +445,165 @@ InstallFlatpak() {
         fi
     fi
 }
-VMSetup() {
+
+#Install Yubikey Packages
+InstallYubiSW() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    printf '\nInstalling Required Packages for yubikey authentication.'
+    InstallPKG libpam-yubico
+    InstallPKG libpam-u2f
+    InstallPKG yubikey-manager
+    InstallPKG yubikey-personalization
+
+}
+#Set up Yubikey for One Time Password Authentication
+CreateYubikeyChalResp() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    printf '\nSetting up Challenge Response Authentication\n'
+    printf '\nPlease Insert your yubikey and press any key to continue.'
+    read -rsn1 -p
+    printf '\nWARNING IF YOU HAVE ALREADY PROGRAMED CHALLENGE RESPONSE, THIS STEP WILL OVERWRITE YOUR EXISTING KEY WITH A NEW ONE. SKIP THIS STEP IF YOU DO NOT WANT A NEW KEY!\n'
+    sleep 1s
+    while true; do
+        printf '\nWould you like to program challenge reponse keys on your yubikey? [y/N]'
+        read -r yn
+        yn=${yn:-n}
+        case $yn in
+            [Yy]* ) ykpersonalize -2 -ochal-resp -ochal-hmac -ohmac-lt64 -oserial-api-visible ;
+                while true; do
+                    printf '\nWould you like to program challenge reponse keys on another yubikey? [y/N]'
+                    read -r yn
+                    yn=${yn:-N}
+                    case $yn in
+                        [Yy]* ) printf '\nPlease insert your next yubikey and press any key to continue.'
+                        read -rsn1
+                        ykpersonalize -2 -ochal-resp -ochal-hmac -ohmac-lt64 -oserial-api-visible;
+                        ;;
+                        [Nn]* ) break
+                        ;;
+                        * ) AnswerYN
+                        ;;
+                    esac
+                done
+            ;;
+            [Nn]* ) break
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    done
+    printf '\nNow creating Yubikey Challenge Response files.\n'
+    sleep 1s
+    while true; do
+        ykpamcfg -2 -v
+        printf '\nWould you like to add another yubikey? [Y/n]'
+        read -r yn
+        yn=${yn:-N}
+        case $yn in
+            [Yy]* ) printf '\nPlease insert your next yubikey and press any key to continue.'
+                    read -rsn1
+                    ykpamcfg -2 -v
+            ;;
+            [Nn]* ) printf '\nSkipping.'
+                    break
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    done
+}
+#Set up Yubikey for Challange Response Authentication
+CreateYubikeyOTP() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    printf '\nSetting up OTP (One Time Password) Authentication.\n'
+    sleep1s
+    authkeys=$USER
+    printf '\nPlease touch your Yubikey.'
+    read -r ykey
+    ykey12=${ykey:0:12}
+    authkeys+=':'
+    authkeys+="$ykey12"
+    while true; do
+        printf '\nWould you like to add another Yubikey? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* )printf '\nPlease touch your Yubikey.'
+                   read -r ykey
+                   ykey12=${ykey:0:12}
+                   authkeys+=':'
+                   authkeys+="$ykey12"
+            ;;
+            [Nn]* ) printf '\nSkipping.\n'
+                    echo $authkeys | tee >> ./authorized_yubikeys;
+                    break
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    echo $authkeys | tee >> ./authorized_yubikeys
+    printf '\nKeys saved to ./authorized_yubikeys.'
+    done
+}
+#Copy Key files and PAM rules
+CPYubikeyFiles() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    printf 'Creating key directories and copying key files to appropriate locations. You may need to manually edit some files.'\
+    sleep 1s
+    mkdir -p /var/yubico
+    chown root:root /var/yubico
+    chmod 766 /var/yubico
+    cp ./authorized_yubikeys /var/yubico/authorized_yubikeys
+    for i in ~/.yubico/*; do
+        cp $i $(echo $i | sed "s/challenge/$USER/")
+        cp ~/.yubico/$USER* /var/yubico/
+        chown root:root /var/yubico/*
+        chmod 600 /var/yubico/*
+    done
+    chmod 700 /var/yubico
+    cp ./pamfiles/yubikey /etc/pam.d/yubikey
+    cp ./pamfiles/yubikey-pin /etc/pam.d/yubikey-pin
+    cp ./pamfiles/yubikey-sudo /etc/pam.d/yubikey-sudo
+    printf "\nAdd 'include' statements to /etc/pam auth files to specify your security preferences."
+    sleep 1s
 }
 
+#Install Spice-vdagent for QEMU VMs
+VMSetup() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if ! CheckForPackage spice-vdagent; then
+        printf '\nWould you like to install spice-vdagent for an improved VM desktop experience? [Y/n] '
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) InstallPKG spice-vdagent
+                check_exit_status
+            ;;
+            [Nn]* ) printf '\nSkipping installing Spice-vdagent.'
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    fi
+}
+
+#Install Refind for Dual Boot Systems
 DualBootSetup() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if ! CheckForPackage refind; then
+        printf '\nRefind is a graphical bootloader that shows the icons of the installed operating systems.'
+        printf '\nWould you like to install refind? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) InstallPKG refind
+            ;;
+            [Nn]* ) printf '\nSkipping installing refind.'
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    fi
 }
 
 #check process for errors and prompt user to exit script if errors are detected.
@@ -482,7 +621,7 @@ check_exit_status() {
             ;;
             [Nn]* ) break
             ;;
-            *) printf '\nPlease answer yes or no.'
+            *) AnswerYN
             ;;
         esac
     fi
@@ -501,23 +640,102 @@ GoodBye() {
     exit
 }
 
+AnswerYN() {
+    printf '\nPlease answer yes or no.'
+}
+
+#Functions ---> ^ ^ ^ ^ ^ ^ ^ ^ <-----
+#Script ------> V V V V V V V V <----- 
 
 
-Greeting
+#Greet The User and Warn of using scripts that need root privilages.
+#Greeting
 PKGMGR=apt
 DefinedSHELL=/bin/bash
 
-SetupNala
-UpdateSoftware
-SetupZSH
-InstallPKG vim
-InstallFlatpak
-InstallSnapd
-InstallPKG cowsay
-CreateUsers
-InstallPKG sudo
-VMSetup
-DualBootSetup
+#Setup Nala
+#if ! CheckForPackage [[nala -o nala-legacy]] 
+#    if IsRoot; then
+#        printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
+#        sleep 1s
+#        printf "\nWould you like to install Nala? [y/N]"
+#        read -p yn
+#        yn=${yn:-N}
+#        case $yn in
+#            [Yy]* ) SetupNala
+#            ;;
+#            [Nn]* ) 
+#            ;;
+#            * ) AnswerYN
+#        esac
+#    else
+#        PKGMGR=nala
+#        export LC_ALL=C.UTF-8
+#        export LANG=C.UTF-8
+#fi
+
+#UpdateSoftware
+
+#SetupZSH
+
+#InstallPKG vim
+
+#InstallFlatpak
+
+#InstallSnapd
+
+#CreateUsers
 
 
-GoodBye
+#InstallPKG sudo
+
+#Setup SpiceVD Agent for QEMU VMs.
+#if IsRoot; then
+#    printf '\nIs this system a QEMU based virtual machine? [y/N]'
+#    read -r yn
+#    yn=${yn:-Y}
+#        case $yn in
+#            [Yy]* ) VMSetup
+#            ;;
+#            [Nn]* ) printf '\nSkipping VM setup'
+#            ;;
+#            *) AnswerYN
+#            ;;
+#        esac
+#fi
+
+#Setup Refind for Dual Boot systems
+#if IsRoot; then
+#    printf '\nIs this system a dual boot system? [y/N]'
+#    read -r yn
+#    yn=${yn:-Y}
+#        case $yn in
+#            [Yy]* ) DualBootSetup
+#            ;;
+#            [Nn]* ) printf '\nSkipping DualBoot setup'
+#            ;;
+#            *) AnswerYN
+#            ;;
+#        esac
+#fi
+
+#Setup Yubikey Authentication
+if IsRoot; then
+    printf '\nWould you like to set up Yubikey authentication? [Y/n]'
+    read -r yn
+    yn=${yn:-Y}
+    case $yn in
+        [Yy]* ) InstallYubiSW;
+                CreateYubikeyOTP;
+                CreateYubikeyChalResp;
+                CPYubikeyFiles;
+                return 0
+        ;;
+        [Nn]* ) printf "\nSkipping Yubikey setup\n";
+                break
+        ;;
+        * ) echo 'Please answer yes or no.';;
+        esac
+fi
+
+#GoodBye
