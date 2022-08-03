@@ -388,7 +388,7 @@ CopyZshrcFile() {
             [Yy]* ) rcfile=./rcfiles/zshrc
                     if [[ -f "$rcfile" ]]; then
                     cp ./rcfiles/zshrc /root/.zshrc
-                    cp ./rcfiles/zshrc /etc/skel
+                    cp ./rcfiles/zshrc /etc/skel/.zshrc
                     cp ./rcfiles/zshrc /home/$USER/.zshrc
                 else
                     printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
@@ -825,6 +825,7 @@ else
             [Nn]* ) 
             ;;
             * ) AnswerYN
+            ;;
         esac
     else
         PKGMGR=nala
