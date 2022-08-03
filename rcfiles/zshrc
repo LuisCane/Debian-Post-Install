@@ -38,6 +38,10 @@ PROMPT="%F{red}┌[%f%F{cyan}$USER%f%F{yellow}@%f%F{green}%m%f%F{red}]─[%f%F{y
 # Export PATH$
 export PATH=~/.local/bin:/snap/bin:/usr/sandbox/:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/share/games:/usr/local/sbin:/usr/sbin:/sbin:$PATH
 
+#Export Environment Variables
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
 #ZSH History
 HISTFILE=~/.zsh_history
 HISTSIZE=1000

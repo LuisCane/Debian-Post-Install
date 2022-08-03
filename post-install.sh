@@ -107,12 +107,16 @@ SetupNala() {
             printf '\nNala might not be supported on your specific distribution.'
         else
             PKGMGR=nala
+            echo 'export LC_ALL=C.UTF-8' >> /etc/profile
             export LC_ALL=C.UTF-8
+            echo 'export LANG=C.UTF-8'
             export LANG=C.UTF-8
         fi
     else
         PKGMGR=nala
+        echo 'export LC_ALL=C.UTF-8' >> /etc/profile
         export LC_ALL=C.UTF-8
+        echo 'export LANG=C.UTF-8'
         export LANG=C.UTF-8
     fi
     nala fetch
