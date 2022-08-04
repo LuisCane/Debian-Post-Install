@@ -229,20 +229,17 @@ UpdateSnap() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if CheckForPackage snapd; then
-        while true; do
         read -p $'Would you like to update the Snap Packages? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) snap refresh;
-            check_exit_status 
-            break
+            [Yy]* ) snap refresh
+            check_exit_status
             ;;
-            [Nn]* ) break
+            [Nn]* ) printf '\nSkipping Snap Update.'
             ;;
             * ) AnswerYN
             ;;
         esac
-    done
     else
     printf "Snapd is not installed, skipping snap updates."
     fi
@@ -253,20 +250,17 @@ UpdateFlatpak() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if CheckForPackage flatpak; then
-        while true; do
         read -p $'Would you like to update the Flatpak Packages? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) flatpak update;
-            check_exit_status 
-            break
+            [Yy]* ) flatpak update
+            check_exit_status
             ;;
-            [Nn]* ) break
+            [Nn]* ) printf '\nSkipping Flatpak Update'
             ;;
             * ) AnswerYN
             ;;
         esac
-        done
     else
     printf "Flatpak is not installed, skipping Flatpak updates."
     fi
@@ -365,6 +359,7 @@ SetupZSH() {
     if IsRoot; then
         printf "\nWould you like to setup to install ZSH? [y/N]" 
         read -r yn
+        yn=${yn:-N}
         case $yn in
             [Yy]* ) $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
             check_exit_status
@@ -386,7 +381,8 @@ CopyZshrcFile() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if IsRoot; then
-        printf "\nWould you like to copy the zshrc file included with this script to your home directory?" 
+        printf "\nWould you like to copy the zshrc file included with this script to your home directory? [Y/n]" 
+        yn=${yn:-Y}
         read -r yn
         case $yn in
             [Yy]* ) rcfile=./rcfiles/zshrc
@@ -443,11 +439,9 @@ InstallSnapd() {
                 [Yy]* ) printf '\nInstalling %s\n' "snapd"
                         InstallPKG snapd
                         snap install core
-                        check_exit_status;
-                        return 0
+                        check_exit_status
                         ;;
                 [Nn]* ) printf '\nSkipping %s\n' "snapd"
-                        return 0
                         ;;
                     * ) printf '\nPlease enter yes or no.\n'
                         ;;
@@ -468,12 +462,10 @@ InstallFlatpak() {
             case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "flatpak"
                         InstallPKG flatpak
-                        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo;
-                        check_exit_status;
-                        return 0
+                        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+                        check_exit_status
                         ;;
                 [Nn]* ) printf '\nSkipping %s\n' "flatpak"
-                        return 0
                         ;;
                     * ) printf '\nPlease enter yes or no.\n'
                         ;;
@@ -664,7 +656,7 @@ CreateYubikeyOTP() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     printf '\nSetting up OTP (One Time Password) Authentication.\n'
-    sleep1s
+    sleep 1s
     authkeys=$USER
     printf '\nPlease touch your Yubikey.'
     read -r ykey
