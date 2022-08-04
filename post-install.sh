@@ -981,7 +981,7 @@ case $yn in
             else
                 printf '\nYou are not root, installing firestorm as user will install to your home directory. Proceed? [Y/n]'
                 read -r yn
-                yn=${yn:-Y}
+                yn=${yn:-N}
                 case $yn in
                     [Yy]* ) InstallFirestorm
                     ;;
