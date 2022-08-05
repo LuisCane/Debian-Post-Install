@@ -164,7 +164,7 @@ UpdateApt () {
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) printf '\nInstalling apt package updates.\n'
-            sleep1s
+            sleep 1s
             $PKGMGR -y dist-upgrade --allow-downgrades;
             check_exit_status
             $PKGMGR -y autoremove;
@@ -204,7 +204,7 @@ sleep 1s
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) printf '\nInstalling apt package updates.\n'
-            sleep1s
+            sleep 1s
             $PKGMGR upgrade;
             check_exit_status
             $PKGMGR autoremove;
@@ -813,7 +813,7 @@ else
         printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
         sleep 1s
         printf "\nWould you like to install Nala? [y/N]"
-        read -p yn
+        read -r yn
         yn=${yn:-N}
         case $yn in
             [Yy]* ) SetupNala
