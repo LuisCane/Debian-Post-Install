@@ -964,12 +964,8 @@ export LANG=C.UTF-8
 #Setup Nala
 if CheckForPackage nala; then
     PKGMGR=nala
-    export LC_ALL=C.UTF-8
-    export LANG=C.UTF-8
 elif CheckForPackage nala-legacy; then
     PKGMGR=nala
-    export LC_ALL=C.UTF-8
-    export LANG=C.UTF-8
 else
     if IsRoot; then
         printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
@@ -990,9 +986,7 @@ else
             esac
         done
     else
-        PKGMGR=nala
-        export LC_ALL=C.UTF-8
-        export LANG=C.UTF-8
+        PKGMGR=apt
     fi
 fi
 
