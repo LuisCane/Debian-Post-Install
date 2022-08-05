@@ -902,6 +902,31 @@ VMSetup() {
     fi
 }
 
+#Install NordVPN
+InstallNordVPN() {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
+    if ! CheckForPackage nordvpn; then
+        if IsRoot; then
+            while true; do
+            printf '\nWould You like to install NordVPN? [y/N]'
+            read -r yn
+            yn=${yn:-N}
+                case $yn in
+                    [Yy]* ) sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
+                    printf '\nRun this script again as user to finish setting up NordVPN.'
+                    break
+                    ;;
+                    [Nn]* ) printf '\nSkipping installing NordVPN'
+                    break
+                    ;;
+                    * ) AnswerYN
+                    ;;
+                esac
+            done
+        
+}
+
 #Install Refind for Dual Boot Systems
 DualBootSetup() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
@@ -1028,6 +1053,8 @@ SSHKeyGen
 CPbashrc
 
 CPvimrc
+
+InstallNordVPN
 
 InstallPKG sudo
 
