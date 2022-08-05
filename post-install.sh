@@ -403,7 +403,7 @@ SetupZSH() {
                 read -r yn
                 yn=${yn:-Y}
                 case $yn in
-                    [Yy]* ) DefinedSHELL=/bin/zshrc
+                    [Yy]* ) DefinedSHELL=/bin/zsh
                     chsh -s $DefinedSHELL
                     CopyZshrcFile
                     break
@@ -518,10 +518,10 @@ CPbashrc () {
         yn=${yn:-Y}
         case $yn in
             [Yy]* ) if IsRoot; then
-                cp ./home/user/bashrc ~/.bashrc
-                cp ./home/user/bashrc /etc/skel/.bashrc
+                cp ./rcfiles/bashrc ~/.bashrc
+                cp ./rcfiles/bashrc /etc/skel/.bashrc
             else
-                cp ./home/user/bashrc ~/.bashrc
+                cp ./rcfiles/bashrc ~/.bashrc
             fi
             break
             ;;
@@ -544,10 +544,10 @@ CPvimrc ()  {
     yn=${yn:-Y}
     case $yn in
         [Yy]* ) if IsRoot; then
-            cp ./home/user/vimrc ~/.vimrc
-            cp ./home/user/vimrc /etc/skel/.vimrc
+            cp ./rcfiles/vimrc ~/.vimrc
+            cp ./rcfiles/vimrc /etc/skel/.vimrc
         else
-            cp ./home/user/vimrc ~/.vimrc
+            cp ./rcfiles/vimrc ~/.vimrc
         fi
         break
         ;;
@@ -964,7 +964,7 @@ GoodBye() {
 }
 
 AnswerYN() {
-    printf '\nPlease answer yes or no.'
+    printf '\nPlease answer yes or no.\n'
 }
 
 #Functions ---> ^ ^ ^ ^ ^ ^ ^ ^ <-----
@@ -975,9 +975,11 @@ AnswerYN() {
 Greeting
 PKGMGR=apt
 DefinedSHELL=/bin/bash
-echo 'export LC_ALL=C.UTF-8' >> /etc/profile
+if IsRoot; then
+    echo 'export LC_ALL=C.UTF-8' >> /etc/profile
+    echo 'export LANG=C.UTF-8' >> /etc/profile
+fi
 export LC_ALL=C.UTF-8
-echo 'export LANG=C.UTF-8' >> /etc/profile
 export LANG=C.UTF-8
 
 #Setup Nala
