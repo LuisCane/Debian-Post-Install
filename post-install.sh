@@ -15,10 +15,10 @@ This script contains functions that require root privilages.\n'
         read -p $'Do you wish to proceed? [y/N]' yn
         yn=${yn:-N}
         case $yn in
-            [Yy]* ) Proceeding;
-            ScriptDirCheck;
-            RootCheck;
-            return 0
+            [Yy]* ) Proceeding
+            ScriptDirCheck
+            RootCheck
+            break
             ;;
             [Nn]* ) GoodBye
             ;;
@@ -54,8 +54,8 @@ RootCheck() {
         read -p $'Proceed? [Y/n]' yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) Proceeding;
-            return 0
+            [Yy]* ) Proceeding
+            break
             ;;
             [Nn]* ) GoodBye
             ;;
@@ -107,17 +107,9 @@ SetupNala() {
             printf '\nNala might not be supported on your specific distribution.'
         else
             PKGMGR=nala
-            echo 'export LC_ALL=C.UTF-8' >> /etc/profile
-            export LC_ALL=C.UTF-8
-            echo 'export LANG=C.UTF-8'
-            export LANG=C.UTF-8
         fi
     else
         PKGMGR=nala
-        echo 'export LC_ALL=C.UTF-8' >> /etc/profile
-        export LC_ALL=C.UTF-8
-        echo 'export LANG=C.UTF-8'
-        export LANG=C.UTF-8
     fi
     nala fetch
 }
@@ -153,7 +145,8 @@ UpdateApt () {
             check_exit_status 
             break
             ;;
-            [Nn]* ) break
+            [Nn]* ) printf '\nSkipping repository updates.'
+            break
             ;;
             * ) AnswerYN
             ;;
@@ -173,7 +166,8 @@ UpdateApt () {
             check_exit_status
             break
             ;;
-            [Nn]* ) break
+            [Nn]* ) printf '\nSkipping package upgrades.'
+            break
             ;;
             * ) AnswerYN
             ;;
@@ -193,7 +187,8 @@ sleep 1s
             check_exit_status 
             break
             ;;
-            [Nn]* ) break
+            [Nn]* ) printf '\nSkipping repository updates.'
+            break
             ;;
             * ) AnswerYN
             ;;
@@ -205,17 +200,16 @@ sleep 1s
         case $yn in
             [Yy]* ) printf '\nInstalling apt package updates.\n'
             sleep 1s
-            $PKGMGR upgrade;
+            $PKGMGR upgrade
             check_exit_status
-            $PKGMGR autoremove;
+            $PKGMGR autopurge
             check_exit_status
-            $PKGMGR autopurge;
-            check_exit_status
-            $PKGMGR clean;
+            $PKGMGR clean
             check_exit_status
             break
             ;;
-            [Nn]* ) break
+            [Nn]* ) printf '\nSkipping package upgrades.'
+            break
             ;;
             * ) AnswerYN
             ;;
@@ -229,17 +223,21 @@ UpdateSnap() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if CheckForPackage snapd; then
-        read -p $'Would you like to update the Snap Packages? [Y/n]' yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) snap refresh
-            check_exit_status
-            ;;
-            [Nn]* ) printf '\nSkipping Snap Update.'
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            read -p $'Would you like to update the Snap Packages? [Y/n]' yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) snap refresh
+                check_exit_status
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping Snap Update.'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     else
     printf "Snapd is not installed, skipping snap updates."
     fi
@@ -250,17 +248,21 @@ UpdateFlatpak() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if CheckForPackage flatpak; then
-        read -p $'Would you like to update the Flatpak Packages? [Y/n]' yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) flatpak update
-            check_exit_status
-            ;;
-            [Nn]* ) printf '\nSkipping Flatpak Update'
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            read -p $'Would you like to update the Flatpak Packages? [Y/n]' yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) flatpak update
+                check_exit_status
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping Flatpak Update'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     else
     printf "Flatpak is not installed, skipping Flatpak updates."
     fi
@@ -271,30 +273,35 @@ CreateUsers() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if IsRoot; then 
-        printf '\nWould you like to add users? [y/N]'
-        read -r yn
-        yn=${yn:-N}
-        case $yn in
-            [Yy]* ) AddUsers
-                while true; do
-                printf '\nWould you like to add another user? [y/N]'
-                read -r yn
-                yn=${yn:-N}
-                case $yn in
-                    [Yy]* ) AddUsers
-                    ;;
-                    [Nn]* ) break
-                    ;;
-                    * ) AnswerYN
-                    ;;
-                esac
-                done
-            ;;
-            [Nn]* ) 
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf '\nWould you like to add users? [y/N]'
+            read -r yn
+            yn=${yn:-N}
+            case $yn in
+                [Yy]* ) AddUsers
+                    while true; do
+                        printf '\nWould you like to add another user? [y/N]'
+                        read -r yn
+                        yn=${yn:-N}
+                        case $yn in
+                            [Yy]* ) AddUsers
+                            break
+                            ;;
+                            [Nn]* ) printf '\nSkipping adding users.'
+                            break
+                            ;;
+                            * ) AnswerYN
+                            ;;
+                        esac
+                    done
+                ;;
+                [Nn]* ) printf '\nSkipping adding users.'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     fi
 }
 
@@ -315,40 +322,53 @@ MakeUserSudo() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if CheckForPackage sudo; then
-        printf '\nWould you like to add this user to the sudo group? [y/N]'
-        read -r yn
-        yn=${yn:-N}
-        case $yn in
-            [Yy]* ) usermod -aG sudo $definedusername
-            ;;
-            [Nn]* ) printf '\nSkipping making user sudo.'
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf '\nWould you like to add this user to the sudo group? [y/N]'
+            read -r yn
+            yn=${yn:-N}
+            case $yn in
+                [Yy]* ) usermod -aG sudo $definedusername
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping making user sudo.'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     else
-    printf '\nSudo is not installed, would you like to install it? [y/N]'
+    while true; do
+        printf '\nSudo is not installed, would you like to install it? [y/N]'
         read -r yn
         yn=${yn:-N}
         case $yn in
-            [Yy]* ) InstallPKG Sudo
+            [Yy]* ) 
+            while true; do
+                InstallPKG Sudo
                 printf '\nWould you like to add this user to the sudo group? [y/N]'
                 read -r yn
                 yn=${yn:-N}
                 case $yn in
-                   [Yy]* ) usermod -aG sudo $definedusername
-                   ;;
-                   [Nn]* ) printf '\nSkipping making user sudo.'
-                   ;;
-                   * ) AnswerYN
-                   ;;
+                    [Yy]* ) usermod -aG sudo $definedusername
+                    break
+                    ;;
+                    [Nn]* ) printf '\nSkipping making user sudo.'
+                    break
+                    ;;
+                    * ) AnswerYN
+                    ;;
                 esac
+            done
+            break
             ;;
             [Nn]* ) printf '\nSkipping making user sudo.'
+            break
             ;;
             * ) AnswerYN
             ;;
         esac
+    done
     fi
 }
 
@@ -357,22 +377,45 @@ SetupZSH() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if IsRoot; then
-        printf "\nWould you like to setup to install ZSH? [y/N]" 
-        read -r yn
-        yn=${yn:-N}
-        case $yn in
-            [Yy]* ) $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
-            check_exit_status
-            DefinedSHELL=/bin/zsh
-            usermod --shell $DefinedSHELL root
-            usermod --shell $DefinedSHELL $USER
-            CopyZshrcFile
-            ;;
-            [Nn]* )
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf "\nWould you like to setup ZSH? [y/N]" 
+            read -r yn
+            yn=${yn:-N}
+                case $yn in
+                [Yy]* ) $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
+                check_exit_status
+                DefinedSHELL=/bin/zsh
+                usermod --shell $DefinedSHELL root
+                CopyZshrcFile
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping ZSH Setup.'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
+    else
+        if CheckForPackage zsh; then
+            while true; do
+                printf "\nWould you like to set ZSH as your shell? [y/N]" 
+                read -r yn
+                yn=${yn:-Y}
+                case $yn in
+                    [Yy]* ) DefinedSHELL=/bin/zshrc
+                    chsh -s $DefinedSHELL
+                    CopyZshrcFile
+                    break
+                    ;;
+                    [Nn]* ) printf '\nSkipping zsh Setup.'
+                    break
+                    ;;
+                    * ) AnswerYN
+                    ;;
+                esac
+            done
+        fi
     fi
 }
 
@@ -381,25 +424,121 @@ CopyZshrcFile() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if IsRoot; then
-        printf "\nWould you like to copy the zshrc file included with this script to your home directory? [Y/n]" 
-        yn=${yn:-Y}
-        read -r yn
-        case $yn in
-            [Yy]* ) rcfile=./rcfiles/zshrc
-                    if [[ -f "$rcfile" ]]; then
+        while true; do
+            printf "\nWould you like to copy the zshrc file included with this script to your home directory? [Y/n]" 
+            yn=${yn:-Y}
+            read -r yn
+            case $yn in
+                [Yy]* ) rcfile=./rcfiles/zshrc
+                if [[ -f "$rcfile" ]]; then
                     cp ./rcfiles/zshrc /root/.zshrc
                     cp ./rcfiles/zshrc /etc/skel/.zshrc
-                    cp ./rcfiles/zshrc /home/$USER/.zshrc
                 else
-                    printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
+                        printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
                 fi
+                break
+                ;;
+                [Nn]* ) printf "\nSkipping zshrc file."
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
+    else
+        if CheckForPackage zsh; then
+            while true; do
+                printf "\nWould you like to copy the zshrc file included with this script to your home directory? [Y/n]" 
+                yn=${yn:-Y}
+                read -r yn
+                case $yn in
+                    [Yy]* ) rcfile=./rcfiles/zshrc
+                    if [[ -f "$rcfile" ]]; then
+                        cp ./rcfiles/zshrc /home/$USER/.zshrc
+                    else
+                        printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
+                    fi
+                    break
+                    ;;
+                    [Nn]* ) printf "\nSkipping zshrc file."
+                    break
+                    ;;
+                    * ) AnswerYN
+                    ;;
+                esac
+            done
+        fi
+    fi
+}
+
+#Generate SSH Key with comment
+SSHKeyGen () {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    while true; do
+        printf '\nWould you like to generate an SSH key? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) printf '\nPlease enter a type [RSA/dsa]: '
+            read -r keytype
+            keytype=${keytype:-RSA}
+            printf '\nPlease enter a modulus [4096]: '
+            read -r modulus
+            modulus=${modulus:-4096}
+            printf '\nEnter a comment to help identify this key [%s @ %s]: ' "$USER" "$HOSTNAME"
+            read -r keycomment;
+            keycomment=${keycomment:-$USER @ $HOSTNAME}
+            printf '\nEnter an output file [%s/.ssh/%s\_rsa]: ' "$HOME" "$USER"
+            read -r outfile;
+            outfile=${outfile:-$HOME/.ssh/$USER\_rsa}
+            ssh-keygen -t $keytype -b $modulus -C "$keycomment" -f $outfile;
+            break
             ;;
-            [Nn]* ) printf "\nSkipping zshrc file."
+        [Nn]* ) printf '\nSSH Key Not generated\n'
+        break
+        ;;
+        * ) AnswerYN
+        ;;
+        esac
+    done
+}
+
+#Copy bashrc and vimrc to home folder
+CPbashrc () {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    while true; do
+        printf '\nWould you like to copy the bashrc file included with this script to your home folder? [Y/n]' 
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) cp ./home/user/bashrc ~/.bashrc
+            break
             ;;
-            * ) echo "Please answer yes or no"
+            [Nn]* ) printf '\nSkipping bashrc file.\n'
+            break
+            ;;
+            * ) AnswerYN
             ;;
         esac
-    fi
+    done
+}
+CPvimrc ()  {
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    while true; do
+    printf '\nWould you like to copy the vimrc file included with this script to your home folder? [Y/n]' 
+    read -r yn
+    yn=${yn:-Y}
+    case $yn in
+        [Yy]* ) cp ./home/user/vimrc ~/.vimrc
+        break
+        ;;
+        [Nn]* ) printf '\nSkipping vimrc file.\n'
+        break
+        ;;
+        * ) AnswerYN
+        ;;
+        esac
+    done
 }
 
 #Install specified Package
@@ -408,20 +547,22 @@ InstallPKG() {
     sleep 1s
     if IsRoot; then
         if ! CheckForPackage $1; then
-            printf '\nWould you like to install %s? [y/n]' "$1"
-            read -r yn
-            case $yn in
-                [Yy]* ) printf '\nInstalling %s\n' "$1"
-                        $PKGMGR install -y $1
-                        check_exit_status;
-                        return 0
-                        ;;
-                [Nn]* ) printf '\nSkipping %s\n' "$1"
-                        return 0
-                        ;;
-                    * ) printf '\nPlease enter yes or no.\n'
-                        ;;
-            esac
+            while true; do
+                printf '\nWould you like to install %s? [y/n]' "$1"
+                read -r yn
+                case $yn in
+                    [Yy]* ) printf '\nInstalling %s\n' "$1"
+                    $PKGMGR install -y $1
+                    check_exit_status;
+                    break
+                    ;;
+                    [Nn]* ) printf '\nSkipping %s\n' "$1"
+                    break
+                    ;;
+                    * ) AnswerYN
+                    ;;
+                esac
+            done
         else
             printf '\nSkipping %s, already installed.\n' "$1"
         fi
@@ -433,19 +574,23 @@ InstallSnapd() {
     sleep 1s
     if IsRoot; then
         if ! CheckForPackage snapd; then
-            printf '\nWould you like to install %s? [y/n]' "snapd"
-            read -r yn
-            case $yn in
+            while true; do
+                printf '\nWould you like to install %s? [y/n]' "snapd"
+                read -r yn
+                case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "snapd"
-                        InstallPKG snapd
-                        snap install core
-                        check_exit_status
-                        ;;
+                InstallPKG snapd
+                snap install core
+                check_exit_status
+                break
+                ;;
                 [Nn]* ) printf '\nSkipping %s\n' "snapd"
-                        ;;
-                    * ) printf '\nPlease enter yes or no.\n'
-                        ;;
-            esac
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+                esac
+            done
         else
             printf '\nSkipping %s, already installed.\n' "snapd"
         fi  
@@ -457,19 +602,23 @@ InstallFlatpak() {
     sleep 1s
     if IsRoot; then
         if ! CheckForPackage flatpak; then
-            printf '\nWould you like to install %s? [y/n]' "flatpak"
-            read -r yn
-            case $yn in
+            while true; do
+                printf '\nWould you like to install %s? [y/n]' "flatpak"
+                read -r yn
+                case $yn in
                 [Yy]* ) printf '\nInstalling %s\n' "flatpak"
-                        InstallPKG flatpak
-                        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-                        check_exit_status
-                        ;;
+                InstallPKG flatpak
+                flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+                check_exit_status
+                break
+                ;;
                 [Nn]* ) printf '\nSkipping %s\n' "flatpak"
-                        ;;
-                    * ) printf '\nPlease enter yes or no.\n'
-                        ;;
-            esac
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+                esac
+            done
         else
             printf '\nSkipping %s, already installed.\n' "flatpak"
         fi
@@ -482,67 +631,67 @@ InstallAptDeskSW() {
     sleep 1s
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
-    printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
-    read -r yne
-    yne=${yne:-Y}
-    case $yne in
-        [Yy]*) InstallPKG "$line"
-               check_exit_status
-        ;;
-        [Nn]*) printf '\nSkipping %s\n' "$line"
-        ;;
-        [Ee]*) break
-        ;;
-        *) AnswerYN 
-        ;;
-    esac
+        printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
+        read -r yne
+        yne=${yne:-Y}
+        case $yne in
+            [Yy]*) InstallPKG "$line"
+            check_exit_status
+            ;;
+            [Nn]*) printf '\nSkipping %s\n' "$line"
+            ;;
+            [Ee]*) break
+            ;;
+            *) AnswerYN 
+            ;;
+        esac
   done 3< "$file"
 }
 
 #Install Selected server Apt packages
 InstallAptServSW() {
-printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
-sleep 1s
-file='./apps/apt-server-apps'
+    printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    sleep 1s
+    file='./apps/apt-server-apps'
     while read -r line <&3; do
-    printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
-    read -r yne
-    yne=${yne:-Y}
-    case $yne in
-        [Yy]*) InstallPKG "$line"
-               check_exit_status
-        ;;
-        [Nn]*) printf '\nSkipping %s\n' "$line"
-        ;;
-        [Ee]*) break
-        ;;
-        *) AnswerYN 
-        ;;
-    esac
-  done 3< "$file"
+        printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
+        read -r yne
+        yne=${yne:-Y}
+        case $yne in
+            [Yy]*) InstallPKG "$line"
+            check_exit_status
+            ;;
+            [Nn]*) printf '\nSkipping %s\n' "$line"
+            ;;
+            [Ee]*) break
+            ;;
+            *) AnswerYN 
+            ;;
+        esac
+    done 3< "$file"
 }
 
 #Install Selected Flatpak apps
-    InstallFlatpakSW() {
+InstallFlatpakSW() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     file='./apps/flatpak-apps'
     while read -r line <&3; do
-    printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
-    read -r yne
-    yne=${yne:-Y}
-    case $yne in
-        [Yy]*) flatpak install -y "$line"
-               check_exit_status
-        ;;
-        [Nn]*) printf '\nSkipping %s\n' "$line"
-        ;;
-        [Ee]*) break
-        ;;
+        printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
+        read -r yne
+        yne=${yne:-Y}
+        case $yne in
+            [Yy]*) flatpak install -y "$line"
+            check_exit_status
+            ;;
+            [Nn]*) printf '\nSkipping %s\n' "$line"
+            ;;
+            [Ee]*) break
+            ;;
         *) AnswerYN 
-        ;;
-    esac
-  done 3< "$file"
+            ;;
+        esac
+    done 3< "$file"
 }
 
 #Install Selected Snap packages
@@ -551,21 +700,21 @@ InstallSnapSW() {
     sleep 1s
     file='./apps/snap-apps'
     while read -r line <&3; do
-    printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
-    read -r yne
-    yne=${yne:-Y}
-    case $yne in
-        [Yy]*) snap install -y "$line"
-               check_exit_status
-        ;;
-        [Nn]*) printf '\nSkipping %s\n' "$line"
-        ;;
-        [Ee]*) break
-        ;;
-        *) AnswerYN 
-        ;;
-    esac
-  done 3< "$file"
+        printf 'Would you like to install %s [Y-yes (Default) / N-no / E-exit]? ' "$line"
+        read -r yne
+        yne=${yne:-Y}
+        case $yne in
+            [Yy]*) snap install -y "$line"
+            check_exit_status
+            ;;
+            [Nn]*) printf '\nSkipping %s\n' "$line"
+            ;;
+            [Ee]*) break
+            ;;
+            *) AnswerYN 
+            ;;
+        esac
+    done 3< "$file"
 }
 
 #Install Firestorm Second Life Viewer
@@ -618,14 +767,16 @@ CreateYubikeyChalResp() {
                         read -rsn1
                         ykpersonalize -2 -ochal-resp -ochal-hmac -ohmac-lt64 -oserial-api-visible;
                         ;;
-                        [Nn]* ) break
+                        [Nn]* ) printf '\nSkipping.'
+                        break
                         ;;
                         * ) AnswerYN
                         ;;
                     esac
                 done
             ;;
-            [Nn]* ) break
+            [Nn]* ) printf '\nSkipping.'
+            break
             ;;
             * ) AnswerYN
             ;;
@@ -640,11 +791,11 @@ CreateYubikeyChalResp() {
         yn=${yn:-N}
         case $yn in
             [Yy]* ) printf '\nPlease insert your next yubikey and press any key to continue.'
-                    read -rsn1
-                    ykpamcfg -2 -v
+            read -rsn1
+            ykpamcfg -2 -v
             ;;
             [Nn]* ) printf '\nSkipping.'
-                    break
+            break
             ;;
             * ) AnswerYN
             ;;
@@ -669,14 +820,14 @@ CreateYubikeyOTP() {
         yn=${yn:-Y}
         case $yn in
             [Yy]* )printf '\nPlease touch your Yubikey.'
-                   read -r ykey
-                   ykey12=${ykey:0:12}
-                   authkeys+=':'
-                   authkeys+="$ykey12"
+            read -r ykey
+            ykey12=${ykey:0:12}
+            authkeys+=':'
+            authkeys+="$ykey12"
             ;;
             [Nn]* ) printf '\nSkipping.\n'
-                    echo $authkeys | tee >> ./authorized_yubikeys;
-                    break
+            echo $authkeys | tee >> ./authorized_yubikeys;
+            break
             ;;
             * ) AnswerYN
             ;;
@@ -685,6 +836,7 @@ CreateYubikeyOTP() {
     printf '\nKeys saved to ./authorized_yubikeys.'
     done
 }
+
 #Copy Key files and PAM rules
 CPYubikeyFiles() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
@@ -714,18 +866,20 @@ VMSetup() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
     if ! CheckForPackage spice-vdagent; then
-        printf '\nWould you like to install spice-vdagent for an improved VM desktop experience? [Y/n] '
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) InstallPKG spice-vdagent
+        while true; do
+            printf '\nWould you like to install spice-vdagent for an improved VM desktop experience? [Y/n] '
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) InstallPKG spice-vdagent
                 check_exit_status
-            ;;
-            [Nn]* ) printf '\nSkipping installing Spice-vdagent.'
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+                ;;
+                [Nn]* ) printf '\nSkipping installing Spice-vdagent.'
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     fi
 }
 
@@ -735,17 +889,19 @@ DualBootSetup() {
     sleep 1s
     if ! CheckForPackage refind; then
         printf '\nRefind is a graphical bootloader that shows the icons of the installed operating systems.'
-        printf '\nWould you like to install refind? [Y/n]'
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) InstallPKG refind
-            ;;
-            [Nn]* ) printf '\nSkipping installing refind.'
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf '\nWould you like to install refind? [Y/n]'
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) InstallPKG refind
+                ;;
+                [Nn]* ) printf '\nSkipping installing refind.'
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     fi
 }
 
@@ -756,18 +912,20 @@ check_exit_status() {
     if [ $? -eq 0 ]; then
         printf '\nSuccess\n'
     else
-        printf '\nError\n'
-
-        read -p $"The last command exited with an error. Exit script? (y/N) " yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) GoodBye
-            ;;
-            [Nn]* ) break
-            ;;
-            *) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf '\nError\nThe last command exited with an error. Exit script? (y/N) '
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) GoodBye
+                ;;
+                [Nn]* ) Proceeding
+                break
+                ;;
+                *) AnswerYN
+                ;;
+            esac
+        done
     fi
 }
 
@@ -782,7 +940,7 @@ Proceeding() {
 GoodBye() {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     sleep 1s
-    printf "\nGoodbye.\n";
+    printf "\nGoodbye.\n"
     exit
 }
 
@@ -798,6 +956,10 @@ AnswerYN() {
 Greeting
 PKGMGR=apt
 DefinedSHELL=/bin/bash
+echo 'export LC_ALL=C.UTF-8' >> /etc/profile
+export LC_ALL=C.UTF-8
+echo 'export LANG=C.UTF-8' >> /etc/profile
+export LANG=C.UTF-8
 
 #Setup Nala
 if CheckForPackage nala; then
@@ -812,17 +974,21 @@ else
     if IsRoot; then
         printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
         sleep 1s
-        printf "\nWould you like to install Nala? [y/N]"
-        read -r yn
-        yn=${yn:-N}
-        case $yn in
-            [Yy]* ) SetupNala
-            ;;
-            [Nn]* ) 
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf "\nWould you like to install Nala? [y/N]"
+            read -r yn
+            yn=${yn:-N}
+            case $yn in
+                [Yy]* ) SetupNala
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping Nala Setup.'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     else
         PKGMGR=nala
         export LC_ALL=C.UTF-8
@@ -847,104 +1013,132 @@ InstallPKG sudo
 
 #Setup SpiceVD Agent for QEMU VMs.
 if IsRoot; then
-    printf '\nIs this system a QEMU based virtual machine? [y/N]'
-    read -r yn
-    yn=${yn:-Y}
+    while true; do
+        printf '\nIs this system a QEMU based virtual machine? [y/N]'
+        read -r yn
+        yn=${yn:-Y}
         case $yn in
             [Yy]* ) VMSetup
+            break
             ;;
             [Nn]* ) printf '\nSkipping VM setup'
+            break
             ;;
             *) AnswerYN
             ;;
         esac
+    done
 fi
 
 #Setup Refind for Dual Boot systems
 if IsRoot; then
+    while true; do
     printf '\nIs this system a dual boot system? [y/N]'
     read -r yn
     yn=${yn:-Y}
         case $yn in
             [Yy]* ) DualBootSetup
+            break
             ;;
             [Nn]* ) printf '\nSkipping DualBoot setup'
+            break
             ;;
             *) AnswerYN
             ;;
         esac
+    done
 fi
 
 #Setup Yubikey Authentication
 if IsRoot; then
-    printf '\nWould you like to set up Yubikey authentication? [Y/n]'
-    read -r yn
-    yn=${yn:-Y}
-    case $yn in
-        [Yy]* ) InstallYubiSW
-                CreateYubikeyOTP
-                CreateYubikeyChalResp
-                CPYubikeyFiles
-                return 0
-        ;;
-        [Nn]* ) printf "\nSkipping Yubikey setup\n"
-        ;;
-        * ) echo 'Please answer yes or no.'
-        ;;
-    esac
+    while true; do
+        printf '\nWould you like to set up Yubikey authentication? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) InstallYubiSW
+            CreateYubikeyOTP
+            CreateYubikeyChalResp
+            CPYubikeyFiles
+            break
+            ;;
+            [Nn]* ) printf "\nSkipping Yubikey setup\n"
+            break
+            ;;
+            * ) echo 'Please answer yes or no.'
+            break
+            ;;
+        esac
+    done
 fi
 
 #Install Recommended Apt Software
 if IsRoot; then
     printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest version of something, install it from flatpak.'
-    printf '\nWould you like to install apt packages? [Y/n]'
-    read -r yn
-    yn=${yn:-Y}
-    case $yn in
-        [Yy]* ) printf '\nWould you like to install desktop apps? [Y/n]'
+    while true; do
+        printf '\nWould you like to install apt packages? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]* ) while true; do
+                printf '\nWould you like to install desktop apps? [Y/n]'
                 read -r yn
                 yn=${yn:-Y}
                 case $yn in
                     [Yy]*) InstallAptDeskSW
+                    break
                     ;;
-                    [Nn]*)
+                    [Nn]*) printf '\nSkipping Desktop Apps.'
+                    break
                     ;;
                     *) AnswerYN
                     ;;
                 esac
+            done
+            while true; do
                 printf '\nWould you like to install server and CLI apps? [Y/n]'
                 read -r yn
                 yn=${yn:-Y}
                 case $yn in
                     [Yy]*) InstallAptServSW
+                    break
                     ;;
-                    [Nn]*)
+                    [Nn]*) '\nSkipping Server and CLI apps.'
+                    break
                     ;;
                     *) AnswerYN
                     ;;
                 esac
-        ;;
-        [Nn]* ) printf "\nSkipping apt packages\n"
-        ;;
-        * ) AnswerYN
-        ;;
-    esac
+            done
+            break
+            ;;
+            [Nn]* ) printf "\nSkipping apt packages\n"
+            break
+            ;;
+            * ) AnswerYN
+            ;;
+        esac
+    done
 fi
 
 #Install Recommended Flatpak Software
 if ! IsRoot; then
     if CheckForPackage flatpak; then
-        printf '\nWould you like to install Flatpak apps? [Y/n]'
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) InstallFlatpakSW
-            ;;
-            [Nn]* ) printf "\nSkipping Flatpak apps\n"
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf '\nWould you like to install Flatpak apps? [Y/n]'
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) InstallFlatpakSW
+                break
+                ;;
+                [Nn]* ) printf "\nSkipping Flatpak apps\n"
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     else
         printf '\nFlatpak is not installed. Skipping flatpak apps.'
     fi
@@ -955,47 +1149,59 @@ fi
 #Install Recommended snap packages
 if IsRoot; then
     if CheckForPackage snapd; then
-        printf '\nWould you like to install Snap packages? [Y/n]'
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) InstallSnapSW
-            ;;
-            [Nn]* ) printf "\nSkipping Snap apps\n"
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
+        while true; do
+            printf '\nWould you like to install Snap packages? [Y/n]'
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) InstallSnapSW
+                break
+                ;;
+                [Nn]* ) printf "\nSkipping Snap apps\n"
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     else
         printf '\nSnapd is not installed. Skipping Snap Packages.'
     fi
 fi
 
 #Install Firestorm Viewer for Second Life
-printf '\nWould you like to install Firestorm Second Life Viewer? [y/N]'
-read -r yn
-yn=${yn:-Y}
-case $yn in
-    [Yy]* ) if IsRoot; then
-                InstallFirestorm
-            else
+while true; do
+    printf '\nWould you like to install Firestorm Second Life Viewer? [y/N]'
+    read -r yn
+    yn=${yn:-Y}
+    case $yn in
+        [Yy]* ) if IsRoot; then
+        InstallFirestorm
+        else
+            while true; do
                 printf '\nYou are not root, installing firestorm as user will install to your home directory. Proceed? [Y/n]'
                 read -r yn
                 yn=${yn:-N}
                 case $yn in
                     [Yy]* ) InstallFirestorm
+                    break
                     ;;
                     [Nn]* ) printf '\nSkipping Firestorm Installation.'
+                    break
                     ;;
                     *) AnswerYN
                     ;;
-                esac                
-            fi
-    ;;
-    [Nn]* ) printf '\nSkipping Firestorm Installation.'
-    ;;
-    * ) AnswerYN
-    ;;
-esac
+                esac
+            done                
+        fi
+        break
+        ;;
+        [Nn]* ) printf '\nSkipping Firestorm Installation.'
+        break
+        ;;
+        * ) AnswerYN
+        ;;
+    esac
+done
 
 GoodBye
