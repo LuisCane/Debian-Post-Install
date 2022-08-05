@@ -475,6 +475,9 @@ CopyZshrcFile() {
 SSHKeyGen () {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
     while true; do
+        if IsRoot; then
+            printf '\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user.'
+        fi
         printf '\nWould you like to generate an SSH key? [Y/n]'
         read -r yn
         yn=${yn:-Y}
@@ -506,12 +509,20 @@ SSHKeyGen () {
 #Copy bashrc and vimrc to home folder
 CPbashrc () {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if IsRoot; then
+        printf '\nNOTE: You are running this script as root. The bashrc file here will be copied to the /root and /etc/skel/ directories.\n'
+    fi
     while true; do
         printf '\nWould you like to copy the bashrc file included with this script to your home folder? [Y/n]' 
         read -r yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]* ) cp ./home/user/bashrc ~/.bashrc
+            [Yy]* ) if IsRoot; then
+                cp ./home/user/bashrc ~/.bashrc
+                cp ./home/user/bashrc /etc/skel/.bashrc
+            else
+                cp ./home/user/bashrc ~/.bashrc
+            fi
             break
             ;;
             [Nn]* ) printf '\nSkipping bashrc file.\n'
@@ -524,12 +535,20 @@ CPbashrc () {
 }
 CPvimrc ()  {
     printf '\n--------------------> Function: %s <--------------------\n' "${FUNCNAME[0]}"
+    if IsRoot; then
+        printf '\nNOTE: You are running this script as root. The vimrc file here will be copied to the /root and /etc/skel/ directories.\n'
+    fi
     while true; do
     printf '\nWould you like to copy the vimrc file included with this script to your home folder? [Y/n]' 
     read -r yn
     yn=${yn:-Y}
     case $yn in
-        [Yy]* ) cp ./home/user/vimrc ~/.vimrc
+        [Yy]* ) if IsRoot; then
+            cp ./home/user/vimrc ~/.vimrc
+            cp ./home/user/vimrc /etc/skel/.vimrc
+        else
+            cp ./home/user/vimrc ~/.vimrc
+        fi
         break
         ;;
         [Nn]* ) printf '\nSkipping vimrc file.\n'
@@ -1002,6 +1021,11 @@ InstallSnapd
 
 CreateUsers
 
+SSHKeyGen
+
+CPbashrc
+
+CPvimrc
 
 InstallPKG sudo
 
