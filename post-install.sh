@@ -924,7 +924,14 @@ InstallNordVPN() {
                     ;;
                 esac
             done
-        
+        fi
+    else
+        if ! IsRoot; then
+            printf '\nAdding %s to nordvpn group.' "$USER"
+            sudo usermod -aG nordvpn $USER
+            printf '\nReboot the computer to be able to login to NordVPN.'
+        fi
+    fi
 }
 
 #Install Refind for Dual Boot Systems
