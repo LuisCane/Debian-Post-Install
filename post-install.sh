@@ -892,8 +892,10 @@ VMSetup() {
             case $yn in
                 [Yy]* ) InstallPKG spice-vdagent
                 check_exit_status
+                break
                 ;;
                 [Nn]* ) printf '\nSkipping installing Spice-vdagent.'
+                break
                 ;;
                 * ) AnswerYN
                 ;;
