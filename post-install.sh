@@ -852,12 +852,12 @@ CPYubikeyFiles() {
     sleep 1s
 }
 
-#Install Spice-vdagent for QEMU VMs
+#Install Qemu guest agent and/or Spice-vdagent for QEMU VMs
 VMSetup() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if ! CheckForPackage spice-vdagent; then
         while true; do
-            printf '\nWould you like to install spice-vdagent for an improved VM desktop experience? [Y/n] '
+            printf '\nWould you like to install spice-vdagent for an improved desktop VM experience? [Y/n] '
             read -r yn
             yn=${yn:-Y}
             case $yn in
@@ -866,6 +866,24 @@ VMSetup() {
                 break
                 ;;
                 [Nn]* ) printf '\nSkipping installing Spice-vdagent.'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
+    fi
+    if ! CheckForPackage qemu-guest-agent; then
+        while true; do
+            printf '\nWould you like to install qemu-guest-agent for improved VM control and monitoring? [Y/n] '
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) InstallPKG qemu-guest-agent
+                check_exit_status
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping installing qemu-guest-agent.'
                 break
                 ;;
                 * ) AnswerYN

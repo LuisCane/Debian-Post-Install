@@ -1,14 +1,12 @@
 tmux
 nmap
-minicom
 traceroute
 openssh-server
-openvpn
-openvpn3
 neofetch
 apache2
 php
 mariadb
 nginx
 npm
+cloud-init
 EOF
