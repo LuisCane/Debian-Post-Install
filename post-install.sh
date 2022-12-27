@@ -570,6 +570,32 @@ InstallPKG() {
         fi
     fi
 }
+#Remove specified Package
+RemovePKG() {
+    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
+    if IsRoot; then
+        if ! CheckForPackage $1; then
+            while true; do
+                printf '\nWould you like to remove %s? [y/n]' "$1"
+                read -r yn
+                case $yn in
+                    [Yy]* ) printf '\nRemoving %s\n' "$1"
+                    $PKGMGR remove -y $1
+                    check_exit_status;
+                    break
+                    ;;
+                    [Nn]* ) printf '\nSkipping %s\n' "$1"
+                    break
+                    ;;
+                    * ) AnswerYN
+                    ;;
+                esac
+            done
+        else
+            printf '\nSkipping %s, already installed.\n' "$1"
+        fi
+    fi
+}
 #Install specified Package
 InstallSnapd() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
@@ -657,6 +683,28 @@ InstallAptServSW() {
         yne=${yne:-Y}
         case $yne in
             [Yy]*) InstallPKG "$line"
+            check_exit_status
+            ;;
+            [Nn]*) printf '\nSkipping %s\n' "$line"
+            ;;
+            [Ee]*) break
+            ;;
+            *) AnswerYN 
+            ;;
+        esac
+    done 3< "$file"
+}
+
+#Remove Unecessary Apps
+removeUnecessaryApps() {
+    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
+    file='./apps/apt-unecessary-apps'
+    while read -r line <&3; do
+        printf 'Would you like to remove %s [Y-yes Default / N-no / E-exit]? ' "$line"
+        read -r yne
+        yne=${yne:-Y}
+        case $yne in
+            [Yy]*) RemovePKG "$line"
             check_exit_status
             ;;
             [Nn]*) printf '\nSkipping %s\n' "$line"
@@ -1156,6 +1204,26 @@ if IsRoot; then
             break
             ;;
             * ) AnswerYN
+            ;;
+        esac
+    done
+fi
+
+#Remove Unnescessary Gnome Apps
+if IsRoot; then
+    printf '\nNOTE: If you are using GNOME, unnecessary apps such as games may be installed.'
+    while true; do
+        printf '\nWould you like to remove unnecessary apps? [Y/n]'
+        read -r yn
+        yn=${yn:-Y}
+        case $yn in
+            [Yy]*) removeUnecessaryApps
+            break
+            ;;
+            [Nn]*) printf '\nSkipping unnecessary packages removal.\n'
+            break
+            ;;
+            *) AnswerYN
             ;;
         esac
     done
