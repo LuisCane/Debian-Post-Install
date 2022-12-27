@@ -715,6 +715,7 @@ removeUnecessaryApps() {
             ;;
         esac
     done 3< "$file"
+    $PKGMGR nala autoremove
 }
 
 #Install Selected Flatpak apps
