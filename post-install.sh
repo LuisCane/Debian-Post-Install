@@ -547,54 +547,14 @@ CPvimrc ()  {
 #Install specified Package
 InstallPKG() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        if ! CheckForPackage $1; then
-            while true; do
-                printf '\nWould you like to install %s? [y/n]' "$1"
-                read -r yn
-                case $yn in
-                    [Yy]* ) printf '\nInstalling %s\n' "$1"
-                    $PKGMGR install -y $1
-                    check_exit_status;
-                    break
-                    ;;
-                    [Nn]* ) printf '\nSkipping %s\n' "$1"
-                    break
-                    ;;
-                    * ) AnswerYN
-                    ;;
-                esac
-            done
-        else
-            printf '\nSkipping %s, already installed.\n' "$1"
-        fi
-    fi
+    $PKGMGR install -y $1
+    check_exit_status;
 }
 #Remove specified Package
 RemovePKG() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        if ! CheckForPackage $1; then
-            while true; do
-                printf '\nWould you like to remove %s? [y/n]' "$1"
-                read -r yn
-                case $yn in
-                    [Yy]* ) printf '\nRemoving %s\n' "$1"
-                    $PKGMGR remove -y $1
-                    check_exit_status;
-                    break
-                    ;;
-                    [Nn]* ) printf '\nSkipping %s\n' "$1"
-                    break
-                    ;;
-                    * ) AnswerYN
-                    ;;
-                esac
-            done
-        else
-            printf '\nSkipping %s, already installed.\n' "$1"
-        fi
-    fi
+    $PKGMGR remove -y $1
+    check_exit_status;
 }
 #Install specified Package
 InstallSnapd() {
@@ -608,6 +568,9 @@ InstallSnapd() {
                 [Yy]* ) printf '\nInstalling %s\n' "snapd"
                 InstallPKG snapd
                 snap install core
+                if CheckForPackage gnome-software; then
+                    InstallPKG gnome-software-plugin-snap
+                fi
                 check_exit_status
                 break
                 ;;
@@ -635,6 +598,9 @@ InstallFlatpak() {
                 [Yy]* ) printf '\nInstalling %s\n' "flatpak"
                 InstallPKG flatpak
                 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+                if CheckForPackage gnome-software; then
+                    InstallPKG gnome-software-plugin-flatpak
+                fi
                 check_exit_status
                 break
                 ;;
@@ -656,21 +622,29 @@ InstallAptDeskSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
-        printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
-        read -r yne
-        yne=${yne:-Y}
-        case $yne in
-            [Yy]*) InstallPKG "$line"
-            check_exit_status
-            ;;
-            [Nn]*) printf '\nSkipping %s\n' "$line"
-            ;;
-            [Ee]*) break
-            ;;
-            *) AnswerYN 
-            ;;
-        esac
-  done 3< "$file"
+        if IsRoot; then
+            if ! CheckForPackage $1; then
+                while true; do
+                    printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
+                    read -r yne
+                    yne=${yne:-Y}
+                    case $yne in
+                        [Yy]*) $PKGMGR install -y "$line"
+                        check_exit_status
+                        ;;
+                        [Nn]*) printf '\nSkipping %s\n' "$line"
+                        ;;
+                        [Ee]*) break
+                        ;;
+                        *) AnswerYN 
+                        ;;
+                    esac
+                done
+            else
+                printf '\nSkipping %s, already installed.\n' "$1"
+            fi
+        fi    
+    done 3< "$file"
 }
 
 #Install Selected server Apt packages
@@ -678,42 +652,58 @@ InstallAptServSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-server-apps'
     while read -r line <&3; do
-        printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
-        read -r yne
-        yne=${yne:-Y}
-        case $yne in
-            [Yy]*) InstallPKG "$line"
-            check_exit_status
-            ;;
-            [Nn]*) printf '\nSkipping %s\n' "$line"
-            ;;
-            [Ee]*) break
-            ;;
-            *) AnswerYN 
-            ;;
-        esac
+        if IsRoot; then
+            if ! CheckForPackage $1; then
+                while true; do
+                    printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
+                    read -r yne
+                    yne=${yne:-Y}
+                    case $yne in
+                        [Yy]*) $PKGMGR install -y "$line"
+                        check_exit_status
+                        ;;
+                        [Nn]*) printf '\nSkipping %s\n' "$line"
+                        ;;
+                        [Ee]*) break
+                        ;;
+                        *) AnswerYN 
+                        ;;
+                    esac
+                done
+            else
+                printf '\nSkipping %s, already installed.\n' "$1"
+            fi
+        fi    
     done 3< "$file"
 }
 
-#Remove Unecessary Apps
-removeUnecessaryApps() {
+#Remove Unnecessary Apps
+removeUnnecessaryApps() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    file='./apps/apt-unecessary-apps'
+    file='./apps/apt-unnecessary-apps'
     while read -r line <&3; do
-        printf 'Would you like to remove %s [Y-yes Default / N-no / E-exit]? ' "$line"
-        read -r yne
-        yne=${yne:-Y}
-        case $yne in
-            [Yy]*) RemovePKG "$line"
-            check_exit_status
-            ;;
-            [Nn]*) printf '\nSkipping %s\n' "$line"
-            ;;
-            [Ee]*) break
-            ;;
-            *) AnswerYN 
-            ;;
-        esac
+        if IsRoot; then
+            if CheckForPackage $1; then
+                while true; do
+                    printf 'Would you like to remove %s [Y-yes Default / N-no / E-exit]? ' "$line"
+                    read -r yne
+                    yne=${yne:-Y}
+                    case $yne in
+                        [Yy]*) $PKGMGR remove -y "$line"
+                        check_exit_status
+                        ;;
+                        [Nn]*) printf '\nSkipping %s\n' "$line"
+                        ;;
+                        [Ee]*) break
+                        ;;
+                        *) AnswerYN 
+                        ;;
+                    esac
+                done
+            else
+                printf '\nSkipping %s, not installed.\n' "$1"
+            fi
+        fi    
     done 3< "$file"
     $PKGMGR nala autoremove
 }
@@ -1088,8 +1078,6 @@ InstallFlatpak
 
 InstallSnapd
 
-CreateUsers
-
 SSHKeyGen
 
 CPbashrc
@@ -1099,6 +1087,8 @@ CPvimrc
 InstallNordVPN
 
 InstallPKG sudo
+
+CreateUsers
 
 #Setup SpiceVD Agent for QEMU VMs.
 if IsRoot; then
@@ -1218,7 +1208,7 @@ if IsRoot; then
         read -r yn
         yn=${yn:-Y}
         case $yn in
-            [Yy]*) removeUnecessaryApps
+            [Yy]*) removeUnnecessaryApps
             break
             ;;
             [Nn]*) printf '\nSkipping unnecessary packages removal.\n'

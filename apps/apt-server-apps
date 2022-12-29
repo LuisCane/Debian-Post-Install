@@ -3,6 +3,8 @@ nmap
 traceroute
 openssh-server
 neofetch
+tldr
+htop
 apache2
 php
 mariadb
