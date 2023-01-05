@@ -87,6 +87,18 @@ CheckForPackage() {
       return 1
     fi
 }
+#Check if Eddy is installed.
+CheckForEddy() {
+    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
+    printf "Checking for com.github.donadigo.eddy: DPKG\n"
+    DPKG_OK=$(dpkg-query -W --showformat='${Status}\n' com.github.donadigo.eddy|grep "install ok installed")
+    printf "Checking for com.github.donadigo.eddy: USR\n"
+    if [ "install ok installed" = "/usr/bin/com.github.donadigo.eddy" ] || [[ -f "/usr/bin/com.github.donadigo.eddy" ]]; then
+      return 0
+    else
+      return 1
+    fi
+}
 
 #Setup Nala as alternative package manager to Apt
 SetupNala() {
@@ -617,9 +629,45 @@ InstallFlatpak() {
     fi
 }
 
+InstallEddy() {
+    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
+    if IsRoot; then
+        $PKGMGR install -y valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
+        check_exit_status
+        WORKINGDIR=$(pwd)
+        meson build && cd build
+        meson configure -Dprefix=/usr
+        ninja
+        ninja install
+        com.github.donadigo.eddy
+        cd $WORKINGDIR
+    fi
+}
+
 #Install Selected desktop Apt packages
 InstallAptDeskSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
+    if ! CheckForEddy; then
+        while true; do
+            printf 'Eddy is a graphical .deb package installer built for Elementary OS and Used in PopOS.'
+            printf 'Would you like to install Eddy [Y-yes Default / N-no / E-exit]? '
+            read -r yne
+            yne=${yne:-Y}
+            case $yne in
+                [Yy]*) InstallEddy
+                check_exit_status
+                ;;
+                [Nn]*) printf '\nSkipping Eddy\n'
+                ;;
+                [Ee]*) break
+                ;;
+                *) AnswerYN 
+                ;;
+            esac
+        done
+    else
+        printf '\nSkipping Eddy, already installed.\n' "$1"
+    fi
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
         if IsRoot; then
@@ -705,7 +753,7 @@ removeUnnecessaryApps() {
             fi
         fi    
     done 3< "$file"
-    $PKGMGR nala autoremove
+    $PKGMGR autoremove
 }
 
 #Install Selected Flatpak apps
