@@ -631,40 +631,15 @@ InstallFlatpak() {
 
 InstallEddy() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForEddy; then
-        while true; do
-            printf 'Eddy is a graphical .deb package installer built for Elementary OS and Used in PopOS.'
-            printf 'Would you like to install Eddy [Y-yes Default / N-no / E-exit]? '
-            read -r yne
-            yne=${yne:-Y}
-            case $yne in
-                [Yy]*) 
-                $PKGMGR install -y wget valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
-                check_exit_status 
-                WORKINGDIR=$(pwd)
-                mkdir eddy && cd eddy
-                wget https://github.com/donadigo/eddy/archive/refs/tags/1.3.2.tar.gz
-                tar -xzf 1.3.2.tar.gz
-                meson build && cd build
-                meson configure -Dprefix=/usr
-                ninja
-                ninja install
-                com.github.donadigo.eddy
-                cd $WORKINGDIR
-                check_exit_status
-                ;;
-                [Nn]*) printf '\nSkipping Eddy\n'
-                break
-                ;;
-                [Ee]*) break
-                ;;
-                *) AnswerYN 
-                ;;
-            esac
-        done
-    else
-        printf '\nSkipping Eddy, already installed.\n' "$1"
-    fi
+    $PKGMGR install -y wget valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
+    check_exit_status 
+    WORKINGDIR=$(pwd)
+    wget https://github.com/donadigo/eddy/archive/refs/tags/1.3.2.tar.gz
+    tar -xzf 1.3.2.tar.gz eddy
+    meson build ./eddy && cd build ./eddy
+    meson configure ./eddy -Dprefix=/usr
+    ninja ./eddy
+    ninja install ./eddy
 }
 
 #Install Selected desktop Apt packages
@@ -1203,6 +1178,7 @@ if IsRoot; then
 fi
 
 #Install Recommended Apt Software
+
 if IsRoot; then
     printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest version of something, install it from flatpak.'
     while true; do
@@ -1215,8 +1191,7 @@ if IsRoot; then
                 read -r yn
                 yn=${yn:-Y}
                 case $yn in
-                    [Yy]*) InstallEddy
-                    InstallAptDeskSW
+                    [Yy]*) InstallAptDeskSW
                     break
                     ;;
                     [Nn]*) printf '\nSkipping Desktop Apps.'
@@ -1226,6 +1201,26 @@ if IsRoot; then
                     ;;
                 esac
             done
+            if ! CheckForEddy; then
+                while true; do
+                    printf 'Eddy is a graphical .deb package installer built for Elementary OS and Used in PopOS.'
+                    printf 'Would you like to install Eddy [Y-yes Default / N-no / E-exit]? '
+                    read -r yn
+                    yn=${yn:-Y}
+                    case $yn in
+                        [Yy]*) InstallEddy
+                        break
+                        ;;
+                        [Nn]*) printf '\nSkipping Eddy.'
+                        break
+                        ;;
+                        *) AnswerYN
+                        ;;
+                    esac
+                done
+            else
+                printf '\nSkipping Eddy, already installed.\n'
+            fi
             while true; do
                 printf '\nWould you like to install server and CLI apps? [Y/n]'
                 read -r yn
