@@ -654,6 +654,7 @@ InstallEddy() {
                 check_exit_status
                 ;;
                 [Nn]*) printf '\nSkipping Eddy\n'
+                break
                 ;;
                 [Ee]*) break
                 ;;
@@ -682,6 +683,7 @@ InstallAptDeskSW() {
                         check_exit_status
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
+                        break
                         ;;
                         [Ee]*) break
                         ;;
