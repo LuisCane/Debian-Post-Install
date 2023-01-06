@@ -631,22 +631,6 @@ InstallFlatpak() {
 
 InstallEddy() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        $PKGMGR install -y valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
-        check_exit_status
-        WORKINGDIR=$(pwd)
-        meson build && cd build
-        meson configure -Dprefix=/usr
-        ninja
-        ninja install
-        com.github.donadigo.eddy
-        cd $WORKINGDIR
-    fi
-}
-
-#Install Selected desktop Apt packages
-InstallAptDeskSW() {
-    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if ! CheckForEddy; then
         while true; do
             printf 'Eddy is a graphical .deb package installer built for Elementary OS and Used in PopOS.'
@@ -654,7 +638,18 @@ InstallAptDeskSW() {
             read -r yne
             yne=${yne:-Y}
             case $yne in
-                [Yy]*) InstallEddy
+                [Yy]*) 
+                if IsRoot; then
+                    $PKGMGR install -y valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
+                    check_exit_status
+                    WORKINGDIR=$(pwd)
+                    meson build && cd build
+                    meson configure -Dprefix=/usr
+                    ninja
+                    ninja install
+                    com.github.donadigo.eddy
+                    cd $WORKINGDIR
+                fi
                 check_exit_status
                 ;;
                 [Nn]*) printf '\nSkipping Eddy\n'
@@ -668,6 +663,11 @@ InstallAptDeskSW() {
     else
         printf '\nSkipping Eddy, already installed.\n' "$1"
     fi
+}
+
+#Install Selected desktop Apt packages
+InstallAptDeskSW() {
+    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
         if IsRoot; then
@@ -1212,7 +1212,8 @@ if IsRoot; then
                 read -r yn
                 yn=${yn:-Y}
                 case $yn in
-                    [Yy]*) InstallAptDeskSW
+                    [Yy]*) InstallEddy
+                    InstallAptDeskSW
                     break
                     ;;
                     [Nn]*) printf '\nSkipping Desktop Apps.'
