@@ -656,10 +656,10 @@ InstallAptDeskSW() {
                     case $yne in
                         [Yy]*) $PKGMGR install -y "$line"
                         check_exit_status
-                        continue
+                        break
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
-                        continue
+                        break
                         ;;
                         [Ee]*) break
                         ;;
@@ -688,10 +688,10 @@ InstallAptServSW() {
                     case $yne in
                         [Yy]*) $PKGMGR install -y "$line"
                         check_exit_status
-                        continue
+                        break
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
-                        continue
+                        break
                         ;;
                         [Ee]*) break
                         ;;
@@ -720,10 +720,10 @@ removeUnnecessaryApps() {
                     case $yne in
                         [Yy]*) $PKGMGR remove -y "$line"
                         check_exit_status
-                        continue
+                        break
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
-                        continue
+                        break
                         ;;
                         [Ee]*) break
                         ;;
@@ -750,10 +750,10 @@ InstallFlatpakSW() {
         case $yne in
             [Yy]*) flatpak install -y "$line"
             check_exit_status
-            continue
+            break
             ;;
             [Nn]*) printf '\nSkipping %s\n' "$line"
-            continue
+            break
             ;;
             [Ee]*) break
             ;;
@@ -774,10 +774,10 @@ InstallSnapSW() {
         case $yne in
             [Yy]*) snap install -y "$line"
             check_exit_status
-            continue
+            break
             ;;
             [Nn]*) printf '\nSkipping %s\n' "$line"
-            continue
+            break
             ;;
             [Ee]*) break
             ;;
