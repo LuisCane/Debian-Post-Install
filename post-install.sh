@@ -80,7 +80,7 @@ CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     REQUIRED_PKG=$1
     PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
-    echo Checking for $REQUIRED_PKG: $PKG_OK
+    #echo Checking for $REQUIRED_PKG: $PKG_OK
     if [ "install ok installed" = "$PKG_OK" ]; then
       return 0
     else
