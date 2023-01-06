@@ -656,9 +656,10 @@ InstallAptDeskSW() {
                     case $yne in
                         [Yy]*) $PKGMGR install -y "$line"
                         check_exit_status
+                        continue
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
-                        break
+                        continue
                         ;;
                         [Ee]*) break
                         ;;
@@ -687,8 +688,10 @@ InstallAptServSW() {
                     case $yne in
                         [Yy]*) $PKGMGR install -y "$line"
                         check_exit_status
+                        continue
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
+                        continue
                         ;;
                         [Ee]*) break
                         ;;
@@ -717,8 +720,10 @@ removeUnnecessaryApps() {
                     case $yne in
                         [Yy]*) $PKGMGR remove -y "$line"
                         check_exit_status
+                        continue
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
+                        continue
                         ;;
                         [Ee]*) break
                         ;;
@@ -745,8 +750,10 @@ InstallFlatpakSW() {
         case $yne in
             [Yy]*) flatpak install -y "$line"
             check_exit_status
+            continue
             ;;
             [Nn]*) printf '\nSkipping %s\n' "$line"
+            continue
             ;;
             [Ee]*) break
             ;;
@@ -767,8 +774,10 @@ InstallSnapSW() {
         case $yne in
             [Yy]*) snap install -y "$line"
             check_exit_status
+            continue
             ;;
             [Nn]*) printf '\nSkipping %s\n' "$line"
+            continue
             ;;
             [Ee]*) break
             ;;
@@ -1096,9 +1105,47 @@ fi
 
 UpdateSoftware
 
-SetupZSH
+if IsRoot; then
+    if ! CheckForPackage vim; then
+        while true; do
+            printf '\nWould you like to install VIM? [y/N]'
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) InstallPKG vim
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping VIM setup'
+                break
+                ;;
+                *) AnswerYN
+                ;;
+            esac
+        done
+    fi
+fi
 
-InstallPKG vim
+if IsRoot; then
+    if ! CheckForPackage sudo; then
+        while true; do
+            printf '\nWould you like to install sudo? [y/N]'
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) InstallPKG sudo
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping sudo setup'
+                break
+                ;;
+                *) AnswerYN
+                ;;
+            esac
+        done
+    fi
+fi
+
+SetupZSH
 
 InstallFlatpak
 
@@ -1111,8 +1158,6 @@ CPbashrc
 CPvimrc
 
 InstallNordVPN
-
-InstallPKG sudo
 
 CreateUsers
 
