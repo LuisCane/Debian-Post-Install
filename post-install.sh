@@ -639,20 +639,18 @@ InstallEddy() {
             yne=${yne:-Y}
             case $yne in
                 [Yy]*) 
-                if IsRoot; then
-                    $PKGMGR install -y wget valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
-                    check_exit_status 
-                    WORKINGDIR=$(pwd)
-                    mkdir eddy && cd eddy
-                    wget https://github.com/donadigo/eddy/archive/refs/tags/1.3.2.tar.gz
-                    tar -xzf 1.3.2.tar.gz
-                    meson build && cd build
-                    meson configure -Dprefix=/usr
-                    ninja
-                    ninja install
-                    com.github.donadigo.eddy
-                    cd $WORKINGDIR
-                fi
+                $PKGMGR install -y wget valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
+                check_exit_status 
+                WORKINGDIR=$(pwd)
+                mkdir eddy && cd eddy
+                wget https://github.com/donadigo/eddy/archive/refs/tags/1.3.2.tar.gz
+                tar -xzf 1.3.2.tar.gz
+                meson build && cd build
+                meson configure -Dprefix=/usr
+                ninja
+                ninja install
+                com.github.donadigo.eddy
+                cd $WORKINGDIR
                 check_exit_status
                 ;;
                 [Nn]*) printf '\nSkipping Eddy\n'
