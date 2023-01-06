@@ -645,9 +645,9 @@ InstallEddy() {
 #Install Selected desktop Apt packages
 InstallAptDeskSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    file='./apps/apt-desktop-apps'
-    while read -r line <&3; do
-        if IsRoot; then
+    if IsRoot; then
+        file='./apps/apt-desktop-apps'
+        while read -r line <&3; do
             if ! CheckForPackage $1; then
                 while true; do
                     printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
@@ -655,11 +655,8 @@ InstallAptDeskSW() {
                     yne=${yne:-Y}
                     case $yne in
                         [Yy]*) $PKGMGR install -y "$line"
-                        check_exit_status
-                        break
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
-                        break
                         ;;
                         [Ee]*) break
                         ;;
@@ -669,17 +666,17 @@ InstallAptDeskSW() {
                 done
             else
                 printf '\nSkipping %s, already installed.\n' "$1"
-            fi
-        fi    
-    done 3< "$file"
+            fi    
+        done 3< "$file"
+    fi
 }
 
 #Install Selected server Apt packages
 InstallAptServSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    file='./apps/apt-server-apps'
-    while read -r line <&3; do
-        if IsRoot; then
+    if IsRoot; then
+        file='./apps/apt-server-apps'
+        while read -r line <&3; do
             if ! CheckForPackage $1; then
                 while true; do
                     printf 'Would you like to install %s [Y-yes Default / N-no / E-exit]? ' "$line"
@@ -687,11 +684,8 @@ InstallAptServSW() {
                     yne=${yne:-Y}
                     case $yne in
                         [Yy]*) $PKGMGR install -y "$line"
-                        check_exit_status
-                        break
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
-                        break
                         ;;
                         [Ee]*) break
                         ;;
@@ -701,17 +695,17 @@ InstallAptServSW() {
                 done
             else
                 printf '\nSkipping %s, already installed.\n' "$1"
-            fi
-        fi    
-    done 3< "$file"
+            fi    
+        done 3< "$file"
+    fi
 }
 
 #Remove Unnecessary Apps
 removeUnnecessaryApps() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    file='./apps/apt-unnecessary-apps'
-    while read -r line <&3; do
-        if IsRoot; then
+    if IsRoot; then
+        file='./apps/apt-unnecessary-apps'
+        while read -r line <&3; do
             if CheckForPackage $1; then
                 while true; do
                     printf 'Would you like to remove %s [Y-yes Default / N-no / E-exit]? ' "$line"
@@ -733,10 +727,10 @@ removeUnnecessaryApps() {
                 done
             else
                 printf '\nSkipping %s, not installed.\n' "$1"
-            fi
-        fi    
-    done 3< "$file"
-    $PKGMGR autoremove
+            fi``    
+        done 3< "$file"
+        $PKGMGR autoremove
+    fi
 }
 
 #Install Selected Flatpak apps
@@ -749,11 +743,8 @@ InstallFlatpakSW() {
         yne=${yne:-Y}
         case $yne in
             [Yy]*) flatpak install -y "$line"
-            check_exit_status
-            break
             ;;
             [Nn]*) printf '\nSkipping %s\n' "$line"
-            break
             ;;
             [Ee]*) break
             ;;
@@ -773,11 +764,8 @@ InstallSnapSW() {
         yne=${yne:-Y}
         case $yne in
             [Yy]*) snap install -y "$line"
-            check_exit_status
-            break
             ;;
             [Nn]*) printf '\nSkipping %s\n' "$line"
-            break
             ;;
             [Ee]*) break
             ;;
