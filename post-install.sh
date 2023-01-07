@@ -99,9 +99,9 @@ ScriptDirCheck() {
 CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") ]; then
-      return 0
-    else
       return 1
+    else
+      return 0
     fi
 }
 #Check if Eddy is installed.
@@ -255,7 +255,7 @@ MakeUserSudo() {
 SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        if ! CheckForPackage zsh; then
+        if CheckForPackage zsh; then
             if ask "Would you like to setup ZSH?" Y; then
                 $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
                 check_exit_status
@@ -373,7 +373,7 @@ RemovePKG() {
 #Install specified Package
 InstallSnapd() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage snapd; then
+    if CheckForPackage snapd; then
         if ask "Would you like to install snapd?" N; then
             InstallPKG snapd
             snap install core
@@ -391,7 +391,7 @@ InstallSnapd() {
 #Install flatpak
 InstallFlatpak() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage flatpak; then
+    if CheckForPackage flatpak; then
         if ask "Would you like to install flatpak?" N; then
             printf '\nInstalling %s\n' "flatpak"
             InstallPKG flatpak
