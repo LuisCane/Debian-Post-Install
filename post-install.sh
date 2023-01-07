@@ -22,7 +22,7 @@ ask() {
     fi
 
     # Ask the question (not using "read -p" as it uses stderr not stdout)
-    printf ' %s ' $1 $prompt
+    printf '%s ' $1 $prompt
 
     read reply
 
@@ -50,7 +50,7 @@ This script contains functions that require root privilages.\n'
         ScriptDirCheck
         RootCheck
     else
-        Goodbye
+        GoodBye
     fi
 }
 
@@ -247,15 +247,17 @@ MakeUserSudo() {
 #SetupZSH
 SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if [ IsRoot ] && [[ CheckForPackage zsh ]]; then
-        if ask "\nWould you like to setup ZSH?" Y; then
-            $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
-            check_exit_status
-            DefinedSHELL=/bin/zsh
-            usermod --shell $DefinedSHELL root
-            CopyZshrcFile
-        else
-            printf '\nSkipping ZSH Setup.'
+    if IsRoot; then
+        if ! CheckForPackage zsh; then
+            if ask "\nWould you like to setup ZSH?" Y; then
+                $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
+                check_exit_status
+                DefinedSHELL=/bin/zsh
+                usermod --shell $DefinedSHELL root
+                CopyZshrcFile
+            else
+                printf '\nSkipping ZSH Setup.'
+            fi
         fi
     fi
     if ask "\nWould you like to set ZSH as your shell?" Y; then
@@ -337,26 +339,16 @@ CPvimrc () {
     if IsRoot; then
         printf '\nNOTE: You are running this script as root. The vimrc file here will be copied to the /root and /etc/skel/ directories.\n'
     fi
-    while true; do
-    printf '\nWould you like to copy the vimrc file included with this script to your home folder? [Y/n]' 
-    read -r yn
-    yn=${yn:-Y}
-    case $yn in
-        [Yy]* ) if IsRoot; then
+    if ask "Would you like to copy the vimrc file included with this script to your home folder?" Y; then
+        if IsRoot; then
             cp ./rcfiles/vimrc ~/.vimrc
             cp ./rcfiles/vimrc /etc/skel/.vimrc
         else
             cp ./rcfiles/vimrc ~/.vimrc
         fi
-        break
-        ;;
-        [Nn]* ) printf '\nSkipping vimrc file.\n'
-        break
-        ;;
-        * ) AnswerYN
-        ;;
-        esac
-    done
+    else
+        printf '\nSkipping vimrc file.\n'
+    fi
 }
 
 #Install specified Package
@@ -376,26 +368,16 @@ InstallSnapd() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
         if ! CheckForPackage snapd; then
-            while true; do
-                printf '\nWould you like to install %s? [y/n]' "snapd"
-                read -r yn
-                case $yn in
-                [Yy]* ) printf '\nInstalling %s\n' "snapd"
+            if ask "Would you like to install snapd?" N; then
                 InstallPKG snapd
                 snap install core
                 if CheckForPackage gnome-software; then
                     InstallPKG gnome-software-plugin-snap
                 fi
                 check_exit_status
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping %s\n' "snapd"
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-                esac
-            done
+            else
+                printf '\nSkipping %s\n' "snapd"
+            fi
         else
             printf '\nSkipping %s, already installed.\n' "snapd"
         fi  
@@ -406,26 +388,17 @@ InstallFlatpak() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
         if ! CheckForPackage flatpak; then
-            while true; do
-                printf '\nWould you like to install %s? [y/n]' "flatpak"
-                read -r yn
-                case $yn in
-                [Yy]* ) printf '\nInstalling %s\n' "flatpak"
+            if ask "Would you like to install flatpak?" N; then
+                printf '\nInstalling %s\n' "flatpak"
                 InstallPKG flatpak
                 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
                 if CheckForPackage gnome-software; then
                     InstallPKG gnome-software-plugin-flatpak
                 fi
                 check_exit_status
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping %s\n' "flatpak"
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-                esac
-            done
+            else
+                printf '\nSkipping %s\n' "flatpak"
+            fi
         else
             printf '\nSkipping %s, already installed.\n' "flatpak"
         fi
@@ -875,8 +848,8 @@ elif CheckForPackage nala-legacy; then
     PKGMGR=nala
 else
     if IsRoot; then
-        printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
-        if ask "" N; then
+        printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
+        if ask "Would you like to install Nala?" N; then
             SetupNala
         else
             printf '\nSkipping Nala Setup.'
@@ -888,19 +861,23 @@ fi
 
 UpdateSoftware
 
-if [ IsRoot ] && [[ ! CheckForPackage vim ]]; then
-    if ask "\nWould you like to install VIM?" Y; then
-        InstallPKG vim
-    else
-        printf '\nSkipping VIM install'
+if IsRoot; then
+    if ! CheckForPackage vim; then
+        if ask "Would you like to install VIM?" Y; then
+            InstallPKG vim
+        else
+            printf '\nSkipping VIM install'
+        fi
     fi
 fi
 
-if [ IsRoot ] && [[ ! CheckForPackage sudo ]]; then
-    if ask "\nWould you like to install sudo?" Y; then
-        InstallPKG sudo
-    else
-        printf '\nSkipping sudo setup'
+if IsRoot; then
+    if ! CheckForPackage sudo; then 
+        if ask "Would you like to install sudo?" Y; then
+            InstallPKG sudo
+        else
+            printf '\nSkipping sudo setup'
+        fi
     fi
 fi
 
