@@ -366,42 +366,38 @@ RemovePKG() {
 #Install specified Package
 InstallSnapd() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        if ! CheckForPackage snapd; then
-            if ask "Would you like to install snapd?" N; then
-                InstallPKG snapd
-                snap install core
-                if CheckForPackage gnome-software; then
-                    InstallPKG gnome-software-plugin-snap
-                fi
-                check_exit_status
-            else
-                printf '\nSkipping %s\n' "snapd"
+    if ! CheckForPackage snapd; then
+        if ask "Would you like to install snapd?" N; then
+            InstallPKG snapd
+            snap install core
+            if CheckForPackage gnome-software; then
+                InstallPKG gnome-software-plugin-snap
             fi
+            check_exit_status
         else
-            printf '\nSkipping %s, already installed.\n' "snapd"
-        fi  
+            printf '\nSkipping %s\n' "snapd"
+        fi
+    else
+        printf '\nSkipping %s, already installed.\n' "snapd"
     fi
 }
 #Install flatpak
 InstallFlatpak() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        if ! CheckForPackage flatpak; then
-            if ask "Would you like to install flatpak?" N; then
-                printf '\nInstalling %s\n' "flatpak"
-                InstallPKG flatpak
-                flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-                if CheckForPackage gnome-software; then
-                    InstallPKG gnome-software-plugin-flatpak
-                fi
-                check_exit_status
-            else
-                printf '\nSkipping %s\n' "flatpak"
+    if ! CheckForPackage flatpak; then
+        if ask "Would you like to install flatpak?" N; then
+            printf '\nInstalling %s\n' "flatpak"
+            InstallPKG flatpak
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+            if CheckForPackage gnome-software; then
+                InstallPKG gnome-software-plugin-flatpak
             fi
+            check_exit_status
         else
-            printf '\nSkipping %s, already installed.\n' "flatpak"
+            printf '\nSkipping %s\n' "flatpak"
         fi
+    else
+        printf '\nSkipping %s, already installed.\n' "flatpak"
     fi
 }
 
@@ -421,60 +417,54 @@ InstallEddy() {
 #Install Selected desktop Apt packages
 InstallAptDeskSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        file='./apps/apt-desktop-apps'
-        while read -r line <&3; do
+    file='./apps/apt-desktop-apps'
+    while read -r line <&3; do
+        if ! CheckForPackage $1; then
             if ! CheckForPackage $1; then
-                if ! CheckForPackage $1; then
-                if ask "Would you like to install $line?" N; then
-                    $PKGMGR install -y "$line"
-                else
-                    printf '\nSkipping %s\n' "$line"
-                fi
+            if ask "Would you like to install $line?" N; then
+                $PKGMGR install -y "$line"
             else
-                printf '\nSkipping %s, already installed.\n' "$1"
-            fi     
-        done 3< "$file"
-    fi
+                printf '\nSkipping %s\n' "$line"
+            fi
+        else
+            printf '\nSkipping %s, already installed.\n' "$1"
+        fi     
+    done 3< "$file"
 }
 
 #Install Selected server Apt packages
 InstallAptServSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        file='./apps/apt-server-apps'
-        while read -r line <&3; do
-            if ! CheckForPackage $1; then
-                if ask "Would you like to install $line?" N; then
-                    $PKGMGR install -y "$line"
-                else
-                    printf '\nSkipping %s\n' "$line"
-                fi
+    file='./apps/apt-server-apps'
+    while read -r line <&3; do
+        if ! CheckForPackage $1; then
+            if ask "Would you like to install $line?" N; then
+                $PKGMGR install -y "$line"
             else
-                printf '\nSkipping %s, already installed.\n' "$1"
-            fi    
-        done 3< "$file"
-    fi
+                printf '\nSkipping %s\n' "$line"
+            fi
+        else
+            printf '\nSkipping %s, already installed.\n' "$1"
+        fi    
+    done 3< "$file"
 }
 
 #Remove Unnecessary Apps
 removeUnnecessaryApps() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
-        file='./apps/apt-unnecessary-apps'
-        while read -r line <&3; do
-            if CheckForPackage $1; then
-                if ask "Would you like to remove $line?" N; then
-                    $PKGMGR remove -y "$line"
-                else
-                    printf '\nSkipping %s\n' "$line"
-                fi
+    file='./apps/apt-unnecessary-apps'
+    while read -r line <&3; do
+        if CheckForPackage $1; then
+            if ask "Would you like to remove $line?" N; then
+                $PKGMGR remove -y "$line"
             else
-                printf '\nSkipping %s, not installed.\n' "$1"
-            fi   
-        done 3< "$file"
-        $PKGMGR autoremove
-    fi
+                printf '\nSkipping %s\n' "$line"
+            fi
+        else
+            printf '\nSkipping %s, not installed.\n' "$1"
+        fi   
+    done 3< "$file"
+    $PKGMGR autoremove
 }
 
 #Install Selected Flatpak apps
