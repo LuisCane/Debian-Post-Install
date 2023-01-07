@@ -627,6 +627,8 @@ InstallNordVPN() {
     if ! CheckForPackage nordvpn; then
         if IsRoot; then
             if ask "Would You like to install NordVPN?" N; then
+                InstallPKG curl
+                check_exit_status
                 sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
                 printf '\nRun this script again as user to finish setting up NordVPN.\nPress any key to continue.'
                 read -rsn1
@@ -777,63 +779,32 @@ fi
 
 #Setup SpiceVD Agent for QEMU VMs.
 if IsRoot; then
-    while true; do
-        printf '\nIs this system a QEMU based virtual machine? [y/N]'
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) VMSetup
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping VM setup'
-            break
-            ;;
-            *) AnswerYN
-            ;;
-        esac
-    done
+    if ask "Is this system a QEMU based virtual machine?" N; then
+        VMSetup
+    else
+        printf '\nSkipping VM setup'
+    fi
 fi
 
 #Setup Refind for Dual Boot systems
 if IsRoot; then
-    while true; do
-    printf '\nIs this system a dual boot system? [y/N]'
-    read -r yn
-    yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) DualBootSetup
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping DualBoot setup'
-            break
-            ;;
-            *) AnswerYN
-            ;;
-        esac
-    done
+    if ask "Is this system a dual boot system?" N; then
+        DualBootSetup
+    else
+        printf '\nSkipping DualBoot setup'
+    fi
 fi
 
 #Setup Yubikey Authentication
 if IsRoot; then
-    while true; do
-        printf '\nWould you like to set up Yubikey authentication? [Y/n]'
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) InstallYubiSW
-            CreateYubikeyOTP
-            CreateYubikeyChalResp
-            CPYubikeyFiles
-            break
-            ;;
-            [Nn]* ) printf "\nSkipping Yubikey setup\n"
-            break
-            ;;
-            * ) echo 'Please answer yes or no.'
-            break
-            ;;
-        esac
-    done
+    if ask "Would you like to set up Yubikey authentication?" N; then
+        InstallYubiSW
+        CreateYubikeyOTP
+        CreateYubikeyChalResp
+        CPYubikeyFiles
+    else
+        printf "\nSkipping Yubikey setup\n"
+    fi
 fi
 
 #Install Recommended Apt Software
