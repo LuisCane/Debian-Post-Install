@@ -426,14 +426,14 @@ InstallAptDeskSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
-        if ! CheckForPackage $1; then
+        if CheckForPackage $line; then
             if ask "Would you like to install $line?" N; then
                 $PKGMGR install -y "$line"
             else
                 printf '\nSkipping %s\n' "$line"
             fi
         else
-            printf '\nSkipping %s, already installed.\n' "$1"
+            printf '\nSkipping %s, already installed.\n' "$line"
         fi     
     done 3< "$file"
 }
@@ -443,14 +443,14 @@ InstallAptServSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-server-apps'
     while read -r line <&3; do
-        if ! CheckForPackage $1; then
+        if CheckForPackage $line; then
             if ask "Would you like to install $line?" N; then
                 $PKGMGR install -y "$line"
             else
                 printf '\nSkipping %s\n' "$line"
             fi
         else
-            printf '\nSkipping %s, already installed.\n' "$1"
+            printf '\nSkipping %s, already installed.\n' "$line"
         fi    
     done 3< "$file"
 }
@@ -460,14 +460,14 @@ removeUnnecessaryApps() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-unnecessary-apps'
     while read -r line <&3; do
-        if CheckForPackage $1; then
+        if ! CheckForPackage $line1; then
             if ask "Would you like to remove $line?" N; then
                 $PKGMGR remove -y "$line"
             else
                 printf '\nSkipping %s\n' "$line"
             fi
         else
-            printf '\nSkipping %s, not installed.\n' "$1"
+            printf '\nSkipping %s, not installed.\n' "$line"
         fi   
     done 3< "$file"
     $PKGMGR autoremove
