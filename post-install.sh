@@ -727,7 +727,7 @@ removeUnnecessaryApps() {
                 done
             else
                 printf '\nSkipping %s, not installed.\n' "$1"
-            fi``    
+            fi  
         done 3< "$file"
         $PKGMGR autoremove
     fi
