@@ -655,8 +655,10 @@ InstallAptDeskSW() {
                     yne=${yne:-Y}
                     case $yne in
                         [Yy]*) $PKGMGR install -y "$line"
+                        continue
                         ;;
                         [Nn]*) printf '\nSkipping %s\n' "$line"
+                        continue
                         ;;
                         [Ee]*) break
                         ;;
