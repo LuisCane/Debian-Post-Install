@@ -164,18 +164,18 @@ UpdateApt () {
     fi
     if ask "Would you like to install the apt software updates?" Y; then
         if $PKGMGR=nala; then
-            $PKGMGR -y upgrade;
+            $PKGMGR upgrade -y;
             check_exit_status
-            $PKGMGR -y autoremove;
+            $PKGMGR autoremove -y;
             check_exit_status
-            $PKGMGR -y clean;
+            $PKGMGR clean -y;
             check_exit_status
         else
-            $PKGMGR -y dist-upgrade --allow-downgrades;
+            $PKGMGR dist-upgrade --allow-downgrades -y;
             check_exit_status
-            $PKGMGR -y autoremove;
+            $PKGMGR autoremove -y;
             check_exit_status
-            $PKGMGR -y autoclean;
+            $PKGMGR autoclean -y;
             check_exit_status
         fi
     else
