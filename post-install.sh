@@ -98,9 +98,7 @@ ScriptDirCheck() {
 #Check if apt package is installed.
 CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    REQUIRED_PKG=$1
-    PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
-    if [ "install ok installed" = "$PKG_OK" ]; then
+    if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") ]; then
       return 0
     else
       return 1
@@ -428,7 +426,7 @@ InstallAptDeskSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
-        if [ ! CheckForPackage $1 ]; then
+        if ! CheckForPackage $1; then
             if ask "Would you like to install $line?" N; then
                 $PKGMGR install -y "$line"
             else
