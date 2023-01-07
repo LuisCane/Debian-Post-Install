@@ -428,7 +428,7 @@ InstallAptDeskSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
-        if ! CheckForPackage $1; then
+        if [ ! CheckForPackage $1 ]; then
             if ask "Would you like to install $line?" N; then
                 $PKGMGR install -y "$line"
             else
