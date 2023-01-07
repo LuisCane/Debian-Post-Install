@@ -755,13 +755,14 @@ if IsRoot; then
     printf "\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user."
     if ask "Would you like to generate an SSH key?" N; then
         SSHKeyGen
+    else
+        printf '\nSSH Key Not generated\n'
     fi
-elif
     if ask "Would you like to generate an SSH key?" N; then
         SSHKeyGen
+    else
+       printf '\nSSH Key Not generated\n'
     fi
-else
-    printf '\nSSH Key Not generated\n'
 fi
 
 CPbashrc
