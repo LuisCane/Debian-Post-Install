@@ -394,25 +394,23 @@ SetupZSH() {
             esac
         done
     else
-        
-            while true; do
-                printf "\nWould you like to set ZSH as your shell? [y/N]" 
-                read -r yn
-                yn=${yn:-Y}
-                case $yn in
-                    [Yy]* ) DefinedSHELL=/bin/zsh
-                    chsh -s $DefinedSHELL
-                    CopyZshrcFile
-                    break
-                    ;;
-                    [Nn]* ) printf '\nSkipping zsh Setup.'
-                    break
-                    ;;
-                    * ) AnswerYN
-                    ;;
-                esac
-            done
-        fi
+        while true; do
+            printf "\nWould you like to set ZSH as your shell? [y/N]" 
+            read -r yn
+            yn=${yn:-Y}
+            case $yn in
+                [Yy]* ) DefinedSHELL=/bin/zsh
+                chsh -s $DefinedSHELL
+                CopyZshrcFile
+                break
+                ;;
+                [Nn]* ) printf '\nSkipping zsh Setup.'
+                break
+                ;;
+                * ) AnswerYN
+                ;;
+            esac
+        done
     fi
 }
 
