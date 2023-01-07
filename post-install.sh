@@ -163,12 +163,21 @@ UpdateApt () {
         printf '\nSkipping repository updates.'
     fi
     if ask "Would you like to install the apt software updates?" Y; then
-        $PKGMGR -y dist-upgrade --allow-downgrades;
-        check_exit_status
-        $PKGMGR -y autoremove;
-        check_exit_status
-        $PKGMGR -y autoclean;
-        check_exit_status
+        if $PKGMGR=nala; then
+            $PKGMGR -y upgrade;
+            check_exit_status
+            $PKGMGR -y autoremove;
+            check_exit_status
+            $PKGMGR -y clean;
+            check_exit_status
+        else
+            $PKGMGR -y dist-upgrade --allow-downgrades;
+            check_exit_status
+            $PKGMGR -y autoremove;
+            check_exit_status
+            $PKGMGR -y autoclean;
+            check_exit_status
+        fi
     else
         printf '\nSkipping package upgrades.'
     fi
@@ -249,7 +258,7 @@ SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
         if ! CheckForPackage zsh; then
-            if ask "\nWould you like to setup ZSH?" Y; then
+            if ask "Would you like to setup ZSH?" Y; then
                 $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
                 check_exit_status
                 DefinedSHELL=/bin/zsh
