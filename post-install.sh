@@ -22,7 +22,7 @@ ask() {
     fi
 
     # Ask the question (not using "read -p" as it uses stderr not stdout)
-    printf "%s %s" $1 $prompt
+    printf ' %s ' $1 $prompt
 
     read reply
 
@@ -247,7 +247,7 @@ MakeUserSudo() {
 #SetupZSH
 SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if [ IsRoot ] && [ CheckForPackage zsh ]; then
+    if [ IsRoot ] && [[ CheckForPackage zsh ]]; then
         if ask "\nWould you like to setup ZSH?" Y; then
             $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
             check_exit_status
@@ -888,7 +888,7 @@ fi
 
 UpdateSoftware
 
-if [ IsRoot ] && [ ! CheckForPackage vim ]; then
+if [ IsRoot ] && [[ ! CheckForPackage vim ]]; then
     if ask "\nWould you like to install VIM?" Y; then
         InstallPKG vim
     else
@@ -896,7 +896,7 @@ if [ IsRoot ] && [ ! CheckForPackage vim ]; then
     fi
 fi
 
-if [ IsRoot ] && [ ! CheckForPackage sudo ]; then
+if [ IsRoot ] && [[ ! CheckForPackage sudo ]]; then
     if ask "\nWould you like to install sudo?" Y; then
         InstallPKG sudo
     else
