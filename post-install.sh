@@ -617,7 +617,7 @@ InstallNordVPN() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if ! CheckForPackage nordvpn; then
         if IsRoot; then
-            if ask "Would You like to install NordVPN?"
+            if ask "Would You like to install NordVPN?" N; then
                 sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
                 printf '\nRun this script again as user to finish setting up NordVPN.\nPress any key to continue.'
                 read -rsn1
