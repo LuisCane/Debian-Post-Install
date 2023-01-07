@@ -100,10 +100,9 @@ CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") ]; then
         printf "%s is installed" $1
-        return True
+        return 0
     else
         printf "%s is not installed" $1
-        return False
     fi
 }
 #Check if Eddy is installed.
