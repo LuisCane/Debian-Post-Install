@@ -4,6 +4,7 @@
 # with or without a default answer. It keeps repeating the question until it
 # gets a valid answer.
 ask() {
+    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
   # https://djm.me/ask
   local prompt default reply
 
@@ -21,7 +22,7 @@ ask() {
     fi
 
     # Ask the question (not using "read -p" as it uses stderr not stdout)
-    printf "%s [%s] " $1 $prompt
+    printf "%s %s" $1 $prompt
 
     read reply
 
@@ -40,6 +41,7 @@ ask() {
 }
 
 Greeting () {
+    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     printf '\nHello!\nWelcome to my post install script for debian\n and debian based distributions.\n\nDISCLAIMER\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\n
 This script contains functions that require root privilages.\n'
     sleep 1s
@@ -141,11 +143,7 @@ UpdateSoftware() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
         printf '\nUpdating Software.\nNote: To Update Flatpak software, run this script without root or sudo.\n'
-        if [[ $PKGMGR == nala ]]; then
-            UpdateNala;
-        else
-            UpdateApt;
-        fi
+        UpdateApt
         UpdateSnap;
     elif CheckForPackage flatpak; then
       UpdateFlatpak;
@@ -239,7 +237,7 @@ AddUsers() {
 #Add Defined User to Sudo group
 MakeUserSudo() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if [ CheckForPackage sudo] && if [ ask "\nWould you like to add this user to the sudo group?" N ]; then
+    if [ CheckForPackage sudo ] && [ ask "\nWould you like to add this user to the sudo group?" N ]; then
         usermod -aG sudo $definedusername
     else
         printf '\nSkipping making user sudo.'
@@ -260,13 +258,12 @@ SetupZSH() {
             printf '\nSkipping ZSH Setup.'
         fi
     fi
-        if ask "\nWould you like to set ZSH as your shell?" Y; then
-            DefinedSHELL=/bin/zsh
-            chsh -s $DefinedSHELL
-            CopyZshrcFile
-        else
-            printf '\nSkipping zsh Setup.'
-        fi
+    if ask "\nWould you like to set ZSH as your shell?" Y; then
+        DefinedSHELL=/bin/zsh
+        chsh -s $DefinedSHELL
+        CopyZshrcFile
+    else
+        printf '\nSkipping zsh Setup.'
     fi
 }
 
@@ -323,6 +320,8 @@ CPbashrc () {
     if IsRoot; then
         printf '\nNOTE: You are running this script as root. The bashrc file here will be copied to the /root and /etc/skel/ directories.\n'
     fi
+    if ask "\nWould you like to copy the bashrc file included with this script to your home folder?" Y; then
+        
     while true; do
         printf '\nWould you like to copy the bashrc file included with this script to your home folder? [Y/n]' 
         read -r yn
