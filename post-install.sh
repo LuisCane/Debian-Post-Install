@@ -752,11 +752,12 @@ if IsRoot; then
 fi
 
 if IsRoot; then
-    if ask "\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user.\nWould you like to generate an SSH key?" N; then
+    printf "\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user."
+    if ask "Would you like to generate an SSH key?" N; then
         SSHKeyGen
     fi
 elif
-    if ask "\nWould you like to generate an SSH key?" N; then
+    if ask "Would you like to generate an SSH key?" N; then
         SSHKeyGen
     fi
 else
