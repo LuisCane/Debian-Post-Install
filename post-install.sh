@@ -1,30 +1,55 @@
 #!/bin/bash
+
+# This is a general-purpose function to ask Yes/No questions in Bash, either
+# with or without a default answer. It keeps repeating the question until it
+# gets a valid answer.
+ask() {
+  # https://djm.me/ask
+  local prompt default reply
+
+  while true; do
+
+    if [[ "${2:-}" == "Y" ]]; then
+      prompt="Y/n"
+      default=Y
+    elif [[ "${2:-}" == "N" ]]; then
+      prompt="y/N"
+      default=N
+    else
+      prompt="y/n"
+      default=
+    fi
+
+    # Ask the question (not using "read -p" as it uses stderr not stdout)
+    printf "%s [%s] " $1 $prompt
+
+    read reply
+
+    # Default?
+    if [[ -z "$reply" ]]; then
+      reply=${default}
+    fi
+
+    # Check if the reply is valid
+    case "$reply" in
+    Y* | y*) return 0 ;;
+    N* | n*) return 1 ;;
+    esac
+
+  done
+}
+
 Greeting () {
-    printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    printf '\nHello!'
-    sleep 1s
-    printf '\nWelcome to my post install script for debian\n and debian based distributions.'
-    sleep 1s
-    printf '\n\nDISCLAIMER'
-    sleep 1s
-    printf '\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\n
+    printf '\nHello!\nWelcome to my post install script for debian\n and debian based distributions.\n\nDISCLAIMER\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\n
 This script contains functions that require root privilages.\n'
-    sleep 2s
-    while true; do
-        read -p $'Do you wish to proceed? [y/N]' yn
-        yn=${yn:-N}
-        case $yn in
-            [Yy]* ) Proceeding
-            ScriptDirCheck
-            RootCheck
-            break
-            ;;
-            [Nn]* ) GoodBye
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
+    sleep 1s
+    if ask "Do you wish to proceed?" N; then
+        Proceeding
+        ScriptDirCheck
+        RootCheck
+    else
+        Goodbye
+    fi
 }
 
 #Check if User is Root.
@@ -43,24 +68,17 @@ RootCheck() {
     if IsRoot; then
         printf "\nThis script is being run as root.\n\nCertain parts of this script should be run as a non-root user or without sudo.\nRun the script again for those parts.\n"
         printf "For example if you install flatpak, the apps should be installed as user.\n"
-        sleep 2s
+        sleep 1s
     else 
         printf "\nThis script is not being run as root.\n\nParts that require root privileges will be skipped.\n"
     fi
-    while true; do
-        read -p $'Proceed? [Y/n]' yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) Proceeding
-            break
-            ;;
-            [Nn]* ) GoodBye
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
+    if ask "Proceed?" Y; then
+        Proceeding
+    else
+        GoodBye
+    fi
 }
+
 
 #Make sure script is being run from within the script's directory.
 ScriptDirCheck() {
@@ -80,7 +98,6 @@ CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     REQUIRED_PKG=$1
     PKG_OK=$(dpkg-query -W --showformat='${Status}\n' $REQUIRED_PKG|grep "install ok installed")
-    #echo Checking for $REQUIRED_PKG: $PKG_OK
     if [ "install ok installed" = "$PKG_OK" ]; then
       return 0
     else
@@ -141,107 +158,36 @@ UpdateSoftware() {
 #Update and upgrade apt packages repos
 UpdateApt () {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    while true; do
-        read -p $'Would you like to update the apt repositories? [Y/n]' yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) $PKGMGR update;
-            check_exit_status 
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping repository updates.'
-            break
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
-    while true; do
-        read -p $'Would you like to install the apt software updates? [Y/n]' yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) printf '\nInstalling apt package updates.\n'
-            sleep 1s
-            $PKGMGR -y dist-upgrade --allow-downgrades;
-            check_exit_status
-            $PKGMGR -y autoremove;
-            check_exit_status
-            $PKGMGR -y autoclean;
-            check_exit_status
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping package upgrades.'
-            break
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
+    if ask "Would you like to update the apt repositories?" Y; then
+        $PKGMGR update;
+        check_exit_status
+    else
+        printf '\nSkipping repository updates.'
+    fi
+    if ask "Would you like to install the apt software updates?" Y; then
+        $PKGMGR -y dist-upgrade --allow-downgrades;
+        check_exit_status
+        $PKGMGR -y autoremove;
+        check_exit_status
+        $PKGMGR -y autoclean;
+        check_exit_status
+    else
+        printf '\nSkipping package upgrades.'
+    fi
 }
-
-#Update Apt Packages and repos with Nala
-UpdateNala() {
-printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    while true; do
-        read -p $'Would you like to update the apt repositories? [Y/n]' yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) $PKGMGR update;
-            check_exit_status 
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping repository updates.'
-            break
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
-    while true; do
-        read -p $'Would you like to install the apt software updates? [Y/n]' yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) printf '\nInstalling apt package updates.\n'
-            sleep 1s
-            $PKGMGR upgrade
-            check_exit_status
-            $PKGMGR autopurge
-            check_exit_status
-            $PKGMGR clean
-            check_exit_status
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping package upgrades.'
-            break
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
-}
-
 
 #Update Snap packages
 UpdateSnap() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if CheckForPackage snapd; then
-        while true; do
-            read -p $'Would you like to update the Snap Packages? [Y/n]' yn
-            yn=${yn:-Y}
-            case $yn in
-                [Yy]* ) snap refresh
-                check_exit_status
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping Snap Update.'
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
-        done
+        if ask "" Y; then
+            snap refresh
+            check_exit_status
+        else
+            printf '\nSkipping Snap Update.'
+        fi
     else
-    printf "Snapd is not installed, skipping snap updates."
+        printf "Snapd is not installed, skipping snap updates."
     fi
 }
 
@@ -249,59 +195,33 @@ UpdateSnap() {
 UpdateFlatpak() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if CheckForPackage flatpak; then
-        while true; do
-            read -p $'Would you like to update the Flatpak Packages? [Y/n]' yn
-            yn=${yn:-Y}
-            case $yn in
-                [Yy]* ) flatpak update
-                check_exit_status
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping Flatpak Update'
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
-        done
+        if ask "Would you like to update the Flatpak Packages?" Y; then
+            flatpak update
+            check_exit_status
+        else
+            printf '\nSkipping Flatpak Update'
+        fi
     else
-    printf "Flatpak is not installed, skipping Flatpak updates."
+        printf "Flatpak is not installed, skipping Flatpak updates."
     fi
 }
 
 #CreateUsers
 CreateUsers() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then 
+    if ask "\nWould you like to add users?" N; then
+        AddUsers
         while true; do
-            printf '\nWould you like to add users? [y/N]'
-            read -r yn
-            yn=${yn:-N}
-            case $yn in
-                [Yy]* ) AddUsers
-                    while true; do
-                        printf '\nWould you like to add another user? [y/N]'
-                        read -r yn
-                        yn=${yn:-N}
-                        case $yn in
-                            [Yy]* ) AddUsers
-                            break
-                            ;;
-                            [Nn]* ) printf '\nSkipping adding users.'
-                            break
-                            ;;
-                            * ) AnswerYN
-                            ;;
-                        esac
-                    done
-                ;;
-                [Nn]* ) printf '\nSkipping adding users.'
+            if ask "\nWould you like to add another user?" N; then
+                AddUsers
+                continue
+            else
+                printf '\nSkipping adding users.'
                 break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
+            fi
         done
+    else
+        printf '\nSkipping adding users.'
     fi
 }
 
@@ -319,98 +239,34 @@ AddUsers() {
 #Add Defined User to Sudo group
 MakeUserSudo() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if CheckForPackage sudo; then
-        while true; do
-            printf '\nWould you like to add this user to the sudo group? [y/N]'
-            read -r yn
-            yn=${yn:-N}
-            case $yn in
-                [Yy]* ) usermod -aG sudo $definedusername
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping making user sudo.'
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
-        done
+    if [ CheckForPackage sudo] && if [ ask "\nWould you like to add this user to the sudo group?" N ]; then
+        usermod -aG sudo $definedusername
     else
-    while true; do
-        printf '\nSudo is not installed, would you like to install it? [y/N]'
-        read -r yn
-        yn=${yn:-N}
-        case $yn in
-            [Yy]* ) 
-            while true; do
-                InstallPKG Sudo
-                printf '\nWould you like to add this user to the sudo group? [y/N]'
-                read -r yn
-                yn=${yn:-N}
-                case $yn in
-                    [Yy]* ) usermod -aG sudo $definedusername
-                    break
-                    ;;
-                    [Nn]* ) printf '\nSkipping making user sudo.'
-                    break
-                    ;;
-                    * ) AnswerYN
-                    ;;
-                esac
-            done
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping making user sudo.'
-            break
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
+        printf '\nSkipping making user sudo.'
     fi
 }
-
+    
 #SetupZSH
 SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if [ IsRoot ] && [ CheckForPackage zsh ]; then
-        while true; do
-            printf "\nWould you like to setup ZSH? [y/N]" 
-            read -r yn
-            yn=${yn:-N}
-                case $yn in
-                [Yy]* ) $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
-                check_exit_status
-                DefinedSHELL=/bin/zsh
-                usermod --shell $DefinedSHELL root
-                CopyZshrcFile
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping ZSH Setup.'
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
-        done
-    else
-        while true; do
-            printf "\nWould you like to set ZSH as your shell? [y/N]" 
-            read -r yn
-            yn=${yn:-Y}
-            case $yn in
-                [Yy]* ) DefinedSHELL=/bin/zsh
-                chsh -s $DefinedSHELL
-                CopyZshrcFile
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping zsh Setup.'
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
-        done
+        if ask "\nWould you like to setup ZSH?" Y; then
+            $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
+            check_exit_status
+            DefinedSHELL=/bin/zsh
+            usermod --shell $DefinedSHELL root
+            CopyZshrcFile
+        else
+            printf '\nSkipping ZSH Setup.'
+        fi
+    fi
+        if ask "\nWould you like to set ZSH as your shell?" Y; then
+            DefinedSHELL=/bin/zsh
+            chsh -s $DefinedSHELL
+            CopyZshrcFile
+        else
+            printf '\nSkipping zsh Setup.'
+        fi
     fi
 }
 
@@ -418,49 +274,27 @@ SetupZSH() {
 CopyZshrcFile() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        while true; do
-            printf "\nWould you like to copy the zshrc file included with this script to your home directory? [Y/n]" 
-            yn=${yn:-Y}
-            read -r yn
-            case $yn in
-                [Yy]* ) rcfile=./rcfiles/zshrc
-                if [[ -f "$rcfile" ]]; then
-                    cp ./rcfiles/zshrc /root/.zshrc
-                    cp ./rcfiles/zshrc /etc/skel/.zshrc
-                else
-                        printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
-                fi
-                break
-                ;;
-                [Nn]* ) printf "\nSkipping zshrc file."
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
-        done
-    else
-        if CheckForPackage zsh; then
-            while true; do
-                printf "\nWould you like to copy the zshrc file included with this script to your home directory? [Y/n]" 
-                yn=${yn:-Y}
-                read -r yn
-                case $yn in
-                    [Yy]* ) rcfile=./rcfiles/zshrc
-                    if [[ -f "$rcfile" ]]; then
-                        cp ./rcfiles/zshrc /home/$USER/.zshrc
-                    else
-                        printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
-                    fi
-                    break
-                    ;;
-                    [Nn]* ) printf "\nSkipping zshrc file."
-                    break
-                    ;;
-                    * ) AnswerYN
-                    ;;
-                esac
-            done
+        if ask "\nWould you like to copy the zshrc file included with this script to your home directory?" Y; then
+            rcfile=./rcfiles/zshrc
+            if [[ -f "$rcfile" ]]; then
+                cp ./rcfiles/zshrc /root/.zshrc
+                cp ./rcfiles/zshrc /etc/skel/.zshrc
+            else
+                printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."
+            fi
+        else
+            printf "\nSkipping zshrc file."
+        fi
+    elif CheckForPackage zsh; then
+        if ask "\nWould you like to copy the zshrc file included with this script to your home directory?" Y; then
+            rcfile=./rcfiles/zshrc
+            if [[ -f "$rcfile" ]]; then
+                cp ./rcfiles/zshrc /home/$USER/.zshrc
+            else
+                printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
+            fi
+        else
+            printf "\nSkipping zshrc file."
         fi
     fi
 }
@@ -468,36 +302,19 @@ CopyZshrcFile() {
 #Generate SSH Key with comment
 SSHKeyGen () {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    while true; do
-        if IsRoot; then
-            printf '\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user.'
-        fi
-        printf '\nWould you like to generate an SSH key? [Y/n]'
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) printf '\nPlease enter a type [RSA/dsa]: '
-            read -r keytype
-            keytype=${keytype:-RSA}
-            printf '\nPlease enter a modulus [4096]: '
-            read -r modulus
-            modulus=${modulus:-4096}
-            printf '\nEnter a comment to help identify this key [%s @ %s]: ' "$USER" "$HOSTNAME"
-            read -r keycomment;
-            keycomment=${keycomment:-$USER @ $HOSTNAME}
-            printf '\nEnter an output file [%s/.ssh/%s\_rsa]: ' "$HOME" "$USER"
-            read -r outfile;
-            outfile=${outfile:-$HOME/.ssh/$USER\_rsa}
-            ssh-keygen -t $keytype -b $modulus -C "$keycomment" -f $outfile;
-            break
-            ;;
-        [Nn]* ) printf '\nSSH Key Not generated\n'
-        break
-        ;;
-        * ) AnswerYN
-        ;;
-        esac
-    done
+    printf '\nPlease enter a type [RSA/dsa]: '
+    read -r keytype
+    keytype=${keytype:-RSA}
+    printf '\nPlease enter a modulus [4096]: '
+    read -r modulus
+    modulus=${modulus:-4096}
+    printf '\nEnter a comment to help identify this key [%s @ %s]: ' "$USER" "$HOSTNAME"
+    read -r keycomment;
+    keycomment=${keycomment:-$USER @ $HOSTNAME}
+    printf '\nEnter an output file [%s/.ssh/%s\_rsa]: ' "$HOME" "$USER"
+    read -r outfile;
+    outfile=${outfile:-$HOME/.ssh/$USER\_rsa}
+    ssh-keygen -t $keytype -b $modulus -C "$keycomment" -f $outfile;
 }
 
 #Copy bashrc and vimrc to home folder
@@ -1071,22 +888,11 @@ elif CheckForPackage nala-legacy; then
 else
     if IsRoot; then
         printf "\nNala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
-        sleep 1s
-        while true; do
-            printf "\nWould you like to install Nala? [y/N]"
-            read -r yn
-            yn=${yn:-N}
-            case $yn in
-                [Yy]* ) SetupNala
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping Nala Setup.'
-                break
-                ;;
-                * ) AnswerYN
-                ;;
-            esac
-        done
+        if ask "" N; then
+            SetupNala
+        else
+            printf '\nSkipping Nala Setup.'
+        fi
     else
         PKGMGR=apt
     fi
@@ -1094,61 +900,49 @@ fi
 
 UpdateSoftware
 
-if IsRoot; then
-    if ! CheckForPackage vim; then
-        while true; do
-            printf '\nWould you like to install VIM? [y/N]'
-            read -r yn
-            yn=${yn:-Y}
-            case $yn in
-                [Yy]* ) InstallPKG vim
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping VIM setup'
-                break
-                ;;
-                *) AnswerYN
-                ;;
-            esac
-        done
+if [ IsRoot ] && [ ! CheckForPackage vim ]; then
+    if ask "\nWould you like to install VIM?" Y; then
+        InstallPKG vim
+    else
+        printf '\nSkipping VIM install'
     fi
 fi
 
-if IsRoot; then
-    if ! CheckForPackage sudo; then
-        while true; do
-            printf '\nWould you like to install sudo? [y/N]'
-            read -r yn
-            yn=${yn:-Y}
-            case $yn in
-                [Yy]* ) InstallPKG sudo
-                break
-                ;;
-                [Nn]* ) printf '\nSkipping sudo setup'
-                break
-                ;;
-                *) AnswerYN
-                ;;
-            esac
-        done
+if [ IsRoot ] && [ ! CheckForPackage sudo ]; then
+    if ask "\nWould you like to install sudo?" Y; then
+        InstallPKG sudo
+    else
+        printf '\nSkipping sudo setup'
     fi
 fi
 
 SetupZSH
 
-InstallFlatpak
+if IsRoot; then
+    InstallFlatpak
+    InstallSnapd
+fi
 
-InstallSnapd
-
-SSHKeyGen
+if IsRoot; then
+    if ask "\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user.\nWould you like to generate an SSH key?" N; then
+        SSHKeyGen
+    fi
+elif
+    if ask "\nWould you like to generate an SSH key?" N; then
+        SSHKeyGen
+    fi
+else
+    printf '\nSSH Key Not generated\n'
+fi
 
 CPbashrc
 
 CPvimrc
 
-InstallNordVPN
-
-CreateUsers
+if IsRoot; then
+    InstallNordVPN
+    CreateUsers
+fi
 
 #Setup SpiceVD Agent for QEMU VMs.
 if IsRoot; then
