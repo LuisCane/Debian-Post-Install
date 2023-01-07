@@ -163,7 +163,7 @@ UpdateApt () {
         printf '\nSkipping repository updates.'
     fi
     if ask "Would you like to install the apt software updates?" Y; then
-        if $PKGMGR=nala; then
+        if [ $PKGMGR=nala ]; then
             $PKGMGR upgrade -y;
             check_exit_status
             $PKGMGR autoremove -y;
