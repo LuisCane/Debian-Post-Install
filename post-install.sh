@@ -99,9 +99,11 @@ ScriptDirCheck() {
 CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") ]; then
-      return 1
+        printf "%s is installed" $1
+        return 0
     else
-      return 0
+        printf "%s is not installed" $1
+        return 1
     fi
 }
 #Check if Eddy is installed.
@@ -255,7 +257,7 @@ MakeUserSudo() {
 SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        if CheckForPackage zsh; then
+        if ! CheckForPackage zsh; then
             if ask "Would you like to setup ZSH?" Y; then
                 $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
                 check_exit_status
@@ -373,7 +375,7 @@ RemovePKG() {
 #Install specified Package
 InstallSnapd() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if CheckForPackage snapd; then
+    if ! CheckForPackage snapd; then
         if ask "Would you like to install snapd?" N; then
             InstallPKG snapd
             snap install core
@@ -391,7 +393,7 @@ InstallSnapd() {
 #Install flatpak
 InstallFlatpak() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if CheckForPackage flatpak; then
+    if ! CheckForPackage flatpak; then
         if ask "Would you like to install flatpak?" N; then
             printf '\nInstalling %s\n' "flatpak"
             InstallPKG flatpak
@@ -443,7 +445,7 @@ InstallAptServSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-server-apps'
     while read -r line <&3; do
-        if CheckForPackage $line; then
+        if ! CheckForPackage $line; then
             if ask "Would you like to install $line?" N; then
                 $PKGMGR install -y "$line"
             else
@@ -460,7 +462,7 @@ removeUnnecessaryApps() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-unnecessary-apps'
     while read -r line <&3; do
-        if ! CheckForPackage $line1; then
+        if CheckForPackage $line; then
             if ask "Would you like to remove $line?" N; then
                 $PKGMGR remove -y "$line"
             else
