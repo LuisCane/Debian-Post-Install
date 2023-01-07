@@ -373,7 +373,7 @@ MakeUserSudo() {
 #SetupZSH
 SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if IsRoot; then
+    if [ IsRoot ] && [ CheckForPackage zsh ]; then
         while true; do
             printf "\nWould you like to setup ZSH? [y/N]" 
             read -r yn
@@ -394,7 +394,7 @@ SetupZSH() {
             esac
         done
     else
-        if CheckForPackage zsh; then
+        
             while true; do
                 printf "\nWould you like to set ZSH as your shell? [y/N]" 
                 read -r yn
@@ -661,11 +661,11 @@ InstallAptDeskSW() {
                         break
                         ;;
                         [Ee]*) break
+                        break
                         ;;
                         *) AnswerYN 
                         ;;
                     esac
-                    break
                 done
             else
                 printf '\nSkipping %s, already installed.\n' "$1"
