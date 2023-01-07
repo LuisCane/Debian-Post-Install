@@ -100,10 +100,10 @@ CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") ]; then
         printf "%s is installed" $1
-        return 0
+        return True
     else
         printf "%s is not installed" $1
-        return 1
+        return False
     fi
 }
 #Check if Eddy is installed.
@@ -187,7 +187,7 @@ UpdateApt () {
 UpdateSnap() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if CheckForPackage snapd; then
-        if ask "" Y; then
+        if ask "Would you like to update snap packages?" Y; then
             snap refresh
             check_exit_status
         else
