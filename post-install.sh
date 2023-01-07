@@ -758,6 +758,7 @@ if IsRoot; then
     else
         printf '\nSSH Key Not generated\n'
     fi
+else
     if ask "Would you like to generate an SSH key?" N; then
         SSHKeyGen
     else
