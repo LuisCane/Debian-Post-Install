@@ -321,29 +321,18 @@ CPbashrc () {
         printf '\nNOTE: You are running this script as root. The bashrc file here will be copied to the /root and /etc/skel/ directories.\n'
     fi
     if ask "\nWould you like to copy the bashrc file included with this script to your home folder?" Y; then
-        
-    while true; do
-        printf '\nWould you like to copy the bashrc file included with this script to your home folder? [Y/n]' 
-        read -r yn
-        yn=${yn:-Y}
-        case $yn in
-            [Yy]* ) if IsRoot; then
-                cp ./rcfiles/bashrc ~/.bashrc
-                cp ./rcfiles/bashrc /etc/skel/.bashrc
-            else
-                cp ./rcfiles/bashrc ~/.bashrc
-            fi
-            break
-            ;;
-            [Nn]* ) printf '\nSkipping bashrc file.\n'
-            break
-            ;;
-            * ) AnswerYN
-            ;;
-        esac
-    done
+        if IsRoot; then
+            cp ./rcfiles/bashrc ~/.bashrc
+            cp ./rcfiles/bashrc /etc/skel/.bashrc
+        else
+            cp ./rcfiles/bashrc ~/.bashrc
+        fi
+    else
+        printf '\nSkipping bashrc file.\n'
+    fi
 }
-CPvimrc ()  {
+
+CPvimrc () {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
         printf '\nNOTE: You are running this script as root. The vimrc file here will be copied to the /root and /etc/skel/ directories.\n'
