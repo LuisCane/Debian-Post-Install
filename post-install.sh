@@ -96,16 +96,13 @@ ScriptDirCheck() {
 }
 
 #Check if apt package is installed.
+# If CheckForPackage package; then
+# package is not installed.
+# If ! CheckForPackage package; then
+# package is installed.
 CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     return $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed")
-#    if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") -eq 1 ]; then
-#        printf "%s is installed" $1
-#        return 0
-#    else
-#        printf "%s is not installed" $1
-#        return 1
-#    fi
 }
 #Check if Eddy is installed.
 CheckForEddy() {
@@ -146,7 +143,7 @@ UpdateSoftware() {
         printf '\nUpdating Software.\nNote: To Update Flatpak software, run this script without root or sudo.\n'
         UpdateApt
         UpdateSnap;
-    elif CheckForPackage flatpak; then
+    elif ! CheckForPackage flatpak; then
       UpdateFlatpak;
     else   
       printf '\nSkipping Updates'
@@ -187,7 +184,7 @@ UpdateApt () {
 #Update Snap packages
 UpdateSnap() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if CheckForPackage snapd; then
+    if ! CheckForPackage snapd; then
         if ask "Would you like to update snap packages?" Y; then
             snap refresh
             check_exit_status
@@ -202,7 +199,7 @@ UpdateSnap() {
 #Update Flatpak packages
 UpdateFlatpak() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if CheckForPackage flatpak; then
+    if ! CheckForPackage flatpak; then
         if ask "Would you like to update the Flatpak Packages?" Y; then
             flatpak update
             check_exit_status
@@ -217,10 +214,10 @@ UpdateFlatpak() {
 #CreateUsers
 CreateUsers() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ask "\nWould you like to add users?" N; then
+    if ask "Would you like to add users?" N; then
         AddUsers
         while true; do
-            if ask "\nWould you like to add another user?" N; then
+            if ask "Would you like to add another user?" N; then
                 AddUsers
                 continue
             else
@@ -247,7 +244,7 @@ AddUsers() {
 #Add Defined User to Sudo group
 MakeUserSudo() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if [ CheckForPackage sudo ] && [ ask "\nWould you like to add this user to the sudo group?" N ]; then
+    if [ CheckForPackage sudo ] && [ ask "Would you like to add this user to the sudo group?" N ]; then
         usermod -aG sudo $definedusername
     else
         printf '\nSkipping making user sudo.'
@@ -258,7 +255,7 @@ MakeUserSudo() {
 SetupZSH() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        if ! CheckForPackage zsh; then
+        if CheckForPackage zsh; then
             if ask "Would you like to setup ZSH?" Y; then
                 $PKGMGR install -y zsh zsh-syntax-highlighting zsh-autosuggestions
                 check_exit_status
@@ -270,7 +267,7 @@ SetupZSH() {
             fi
         fi
     fi
-    if ask "\nWould you like to set ZSH as your shell?" Y; then
+    if ask "Would you like to set ZSH as your shell?" Y; then
         DefinedSHELL=/bin/zsh
         chsh -s $DefinedSHELL
         CopyZshrcFile
@@ -283,7 +280,7 @@ SetupZSH() {
 CopyZshrcFile() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     if IsRoot; then
-        if ask "\nWould you like to copy the zshrc file included with this script to your home directory?" Y; then
+        if ask "Would you like to copy the zshrc file included with this script to your home directory?" Y; then
             rcfile=./rcfiles/zshrc
             if [[ -f "$rcfile" ]]; then
                 cp ./rcfiles/zshrc /root/.zshrc
@@ -294,8 +291,8 @@ CopyZshrcFile() {
         else
             printf "\nSkipping zshrc file."
         fi
-    elif CheckForPackage zsh; then
-        if ask "\nWould you like to copy the zshrc file included with this script to your home directory?" Y; then
+    elif ! CheckForPackage zsh; then
+        if ask "Would you like to copy the zshrc file included with this script to your home directory?" Y; then
             rcfile=./rcfiles/zshrc
             if [[ -f "$rcfile" ]]; then
                 cp ./rcfiles/zshrc /home/$USER/.zshrc
@@ -332,7 +329,7 @@ CPbashrc () {
     if IsRoot; then
         printf '\nNOTE: You are running this script as root. The bashrc file here will be copied to the /root and /etc/skel/ directories.\n'
     fi
-    if ask "\nWould you like to copy the bashrc file included with this script to your home folder?" Y; then
+    if ask "Would you like to copy the bashrc file included with this script to your home folder?" Y; then
         if IsRoot; then
             cp ./rcfiles/bashrc ~/.bashrc
             cp ./rcfiles/bashrc /etc/skel/.bashrc
@@ -376,11 +373,11 @@ RemovePKG() {
 #Install specified Package
 InstallSnapd() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage snapd; then
+    if CheckForPackage snapd; then
         if ask "Would you like to install snapd?" N; then
             InstallPKG snapd
             snap install core
-            if CheckForPackage gnome-software; then
+            if ! CheckForPackage gnome-software; then
                 InstallPKG gnome-software-plugin-snap
             fi
             check_exit_status
@@ -394,12 +391,12 @@ InstallSnapd() {
 #Install flatpak
 InstallFlatpak() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage flatpak; then
+    if CheckForPackage flatpak; then
         if ask "Would you like to install flatpak?" N; then
             printf '\nInstalling %s\n' "flatpak"
             InstallPKG flatpak
             flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-            if CheckForPackage gnome-software; then
+            if ! CheckForPackage gnome-software; then
                 InstallPKG gnome-software-plugin-flatpak
             fi
             check_exit_status
@@ -430,6 +427,7 @@ InstallAptDeskSW() {
     file='./apps/apt-desktop-apps'
     while read -r line <&3; do
         if CheckForPackage $line; then
+            printf "\n%s is not installed." "$line"
             if ask "Would you like to install $line?" N; then
                 $PKGMGR install -y "$line"
             else
@@ -446,7 +444,8 @@ InstallAptServSW() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-server-apps'
     while read -r line <&3; do
-        if ! CheckForPackage $line; then
+        if CheckForPackage $line; then
+            printf "\n%s is not installed." "$line"
             if ask "Would you like to install $line?" N; then
                 $PKGMGR install -y "$line"
             else
@@ -463,7 +462,8 @@ removeUnnecessaryApps() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
     file='./apps/apt-unnecessary-apps'
     while read -r line <&3; do
-        if CheckForPackage $line; then
+        if ! CheckForPackage $line; then
+            printf "\n%s is installed." "$line"
             if ask "Would you like to remove $line?" N; then
                 $PKGMGR remove -y "$line"
             else
@@ -604,7 +604,7 @@ CPYubikeyFiles() {
 #Install Qemu guest agent and/or Spice-vdagent for QEMU VMs
 VMSetup() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage spice-vdagent; then
+    if CheckForPackage spice-vdagent; then
         if ask "Would you like to install spice-vdagent for an improved desktop VM experience?" N; then
             InstallPKG spice-vdagent
             check_exit_status
@@ -612,7 +612,7 @@ VMSetup() {
             printf '\nSkipping installing Spice-vdagent.'
         fi
     fi
-    if ! CheckForPackage qemu-guest-agent; then
+    if CheckForPackage qemu-guest-agent; then
         if ask "Would you like to install qemu-guest-agent for improved VM control and monitoring" N; then
             InstallPKG qemu-guest-agent
             check_exit_status
@@ -625,7 +625,7 @@ VMSetup() {
 #Install NordVPN
 InstallNordVPN() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage nordvpn; then
+    if CheckForPackage nordvpn; then
         if IsRoot; then
             if ask "Would You like to install NordVPN?" N; then
                 InstallPKG curl
@@ -650,7 +650,7 @@ InstallNordVPN() {
 #Install Refind for Dual Boot Systems
 DualBootSetup() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if ! CheckForPackage refind; then
+    if CheckForPackage refind; then
         printf '\nRefind is a graphical bootloader that shows the icons of the installed operating systems.'
         if ask "Would you like to install refind?" N; then
             InstallPKG refind
@@ -708,9 +708,9 @@ export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
 #Setup Nala
-if CheckForPackage nala; then
+if ! CheckForPackage nala; then
     PKGMGR=nala
-elif CheckForPackage nala-legacy; then
+elif ! CheckForPackage nala-legacy; then
     PKGMGR=nala
 else
     if IsRoot; then
@@ -728,7 +728,7 @@ fi
 UpdateSoftware
 
 if IsRoot; then
-    if ! CheckForPackage vim; then
+    if CheckForPackage vim; then
         if ask "Would you like to install VIM?" Y; then
             InstallPKG vim
         else
@@ -738,7 +738,7 @@ if IsRoot; then
 fi
 
 if IsRoot; then
-    if ! CheckForPackage sudo; then 
+    if CheckForPackage sudo; then 
         if ask "Would you like to install sudo?" Y; then
             InstallPKG sudo
         else
@@ -850,7 +850,7 @@ fi
 
 #Install Recommended Flatpak Software
 if ! IsRoot; then
-    if CheckForPackage flatpak; then
+    if ! CheckForPackage flatpak; then
         if ask "Would you like to install Flatpak apps?" N; then
             InstallFlatpakSW
         else
@@ -865,7 +865,7 @@ fi
 
 #Install Recommended snap packages
 if IsRoot; then
-    if CheckForPackage snapd; then
+    if ! CheckForPackage snapd; then
         if ask "Would you like to install Snap apps?" N; then
             InstallSnapSW
         else
