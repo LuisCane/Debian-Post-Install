@@ -42,9 +42,7 @@ ask() {
 }
 
 Greeting () {
-    printf '\nHello!\nWelcome to my post install script for debian\n and debian based distributions.\
-    \n\nDISCLAIMER\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\
-    \n\nThis script contains functions that require root privilages.\n'
+    printf '\nHello!\nWelcome to my post install script for debian\nand debian based distributions.\n\nDISCLAIMER\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\nThis script contains functions that require root privilages.\n'
     sleep 1s
     if ask "Do you wish to proceed?" N; then
         Proceeding
@@ -67,7 +65,7 @@ IsRoot() {
 #Check for Root and inform user that the script has parts that require root and parts for non-root users.
 RootCheck() {
     if IsRoot; then
-        printf "\nThis script is being run as root.\n\nCertain parts of this script should be run as a non-root user or without sudo.\
+        printf "\nThis script is being run as root.\n\nCertain parts of this script should be run as a non-root user or without sudo.
         \nRun the script again for those parts.\
         \nFor example if you install flatpak, the apps should be installed as user.\n"
         sleep 1s
@@ -502,8 +500,7 @@ CreateYubikeyChalResp() {
     printf '\nSetting up Challenge Response Authentication\n'
     printf '\nPlease Insert your yubikey and press any key to continue.'
     read -rsn1 -p
-    printf '\nWARNING IF YOU HAVE ALREADY PROGRAMED CHALLENGE RESPONSE, THIS STEP WILL OVERWRITE YOUR EXISTING KEY WITH A NEW ONE. \
-    SKIP THIS STEP IF YOU DO NOT WANT A NEW KEY!\n'
+    printf '\nWARNING IF YOU HAVE ALREADY PROGRAMED CHALLENGE RESPONSE, THIS STEP WILL OVERWRITE YOUR EXISTING KEY WITH A NEW ONE. SKIP THIS STEP IF YOU DO NOT WANT A NEW KEY!\n'
     if ask "Would you like to program challenge reponse keys on your yubikey?" N; then
         ykpersonalize -2 -ochal-resp -ochal-hmac -ohmac-lt64 -oserial-api-visible;
         if ask "Would you like to program challenge reponse keys on another yubikey?" N; then
@@ -673,8 +670,7 @@ elif ! CheckForPackage nala-legacy; then
     PKGMGR=nala
 else
     if IsRoot; then
-        printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, \
-        and the ability to fetch faster mirrors."
+        printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
         if ask "Would you like to install Nala?" N; then
             SetupNala
         else
@@ -771,8 +767,7 @@ fi
 #Install Recommended Apt Software
 
 if IsRoot; then
-    printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest \
-    version of something, install it from flatpak.'
+    printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest version of something, install it from flatpak.'
     if ask "Would you like to install apt packages?" N; then
         if ask "Would you like to install desktop apps?" N; then
             InstallAptDeskSW
