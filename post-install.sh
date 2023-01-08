@@ -98,12 +98,14 @@ ScriptDirCheck() {
 #Check if apt package is installed.
 CheckForPackage() {
     printf '\n--> Function: %s <--\n' "${FUNCNAME[0]}"
-    if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") ]; then
-        printf "%s is installed" $1
-        return 0
-    else
-        printf "%s is not installed" $1
-    fi
+    return $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed")
+#    if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") -eq 1 ]; then
+#        printf "%s is installed" $1
+#        return 0
+#    else
+#        printf "%s is not installed" $1
+#        return 1
+#    fi
 }
 #Check if Eddy is installed.
 CheckForEddy() {
