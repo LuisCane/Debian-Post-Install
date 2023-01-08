@@ -11,17 +11,18 @@ ask() {
   while true; do
 
     if [[ "${2:-}" == "Y" ]]; then
-      prompt="Y/n"
+      prompt="[Y/n]"
       default=Y
     elif [[ "${2:-}" == "N" ]]; then
-      prompt="y/N"
+      prompt="[y/N]"
       default=N
     else
-      prompt="y/n"
+      prompt="[y/n]"
       default=
     fi
 
     # Ask the question (not using "read -p" as it uses stderr not stdout)
+    printf '\n'
     printf '%s ' $1 $prompt
 
     read reply
@@ -41,8 +42,9 @@ ask() {
 }
 
 Greeting () {
-    printf '\nHello!\nWelcome to my post install script for debian\n and debian based distributions.\n\nDISCLAIMER\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\n\n
-This script contains functions that require root privilages.\n'
+    printf '\nHello!\nWelcome to my post install script for debian\n and debian based distributions.\
+    \n\nDISCLAIMER\nIt is not recommended that you run scripts that you find on the internet without knowing exactly what they do.\
+    \n\nThis script contains functions that require root privilages.\n'
     sleep 1s
     if ask "Do you wish to proceed?" N; then
         Proceeding
@@ -65,12 +67,14 @@ IsRoot() {
 #Check for Root and inform user that the script has parts that require root and parts for non-root users.
 RootCheck() {
     if IsRoot; then
-        printf "\nThis script is being run as root.\n\nCertain parts of this script should be run as a non-root user or without sudo.\nRun the script again for those parts.\n"
-        printf "For example if you install flatpak, the apps should be installed as user.\n"
+        printf "\nThis script is being run as root.\n\nCertain parts of this script should be run as a non-root user or without sudo.\
+        \nRun the script again for those parts.\
+        \nFor example if you install flatpak, the apps should be installed as user.\n"
         sleep 1s
     else 
         printf "\nThis script is not being run as root.\n\nParts that require root privileges will be skipped.\n"
     fi
+    
     if ask "Proceed?" Y; then
         Proceeding
     else
@@ -138,7 +142,7 @@ UpdateSoftware() {
     elif ! CheckForPackage flatpak; then
       UpdateFlatpak;
     else   
-      printf '\nSkipping Updates'
+      printf '\nSkipping Updates.\n'
     fi
 }
 
@@ -149,15 +153,13 @@ UpdateApt () {
         $PKGMGR update;
         check_exit_status
     else
-        printf '\nSkipping repository updates.'
+        printf '\nSkipping repository updates.\n'
     fi
     if ask "Would you like to install the apt software updates?" Y; then
         if [ $PKGMGR=nala ]; then
             $PKGMGR upgrade -y;
             check_exit_status
             $PKGMGR autoremove -y;
-            check_exit_status
-            $PKGMGR clean -y;
             check_exit_status
         else
             $PKGMGR dist-upgrade --allow-downgrades -y;
@@ -168,7 +170,7 @@ UpdateApt () {
             check_exit_status
         fi
     else
-        printf '\nSkipping package upgrades.'
+        printf '\nSkipping package upgrades.\n'
     fi
 }
 
@@ -179,10 +181,10 @@ UpdateSnap() {
             snap refresh
             check_exit_status
         else
-            printf '\nSkipping Snap Update.'
+            printf '\nSkipping Snap Update.\n'
         fi
     else
-        printf "Snapd is not installed, skipping snap updates."
+        printf "Snapd is not installed, skipping snap updates.\n"
     fi
 }
 
@@ -193,10 +195,10 @@ UpdateFlatpak() {
             flatpak update
             check_exit_status
         else
-            printf '\nSkipping Flatpak Update'
+            printf '\nSkipping Flatpak Update.\n'
         fi
     else
-        printf "Flatpak is not installed, skipping Flatpak updates."
+        printf "Flatpak is not installed, skipping Flatpak updates.\n"
     fi
 }
 
@@ -209,12 +211,12 @@ CreateUsers() {
                 AddUsers
                 continue
             else
-                printf '\nSkipping adding users.'
+                printf '\nSkipping adding users.\n'
                 break
             fi
         done
     else
-        printf '\nSkipping adding users.'
+        printf '\nSkipping adding users.\n'
     fi
 }
 
@@ -233,7 +235,7 @@ MakeUserSudo() {
     if [ CheckForPackage sudo ] && [ ask "Would you like to add this user to the sudo group?" N ]; then
         usermod -aG sudo $definedusername
     else
-        printf '\nSkipping making user sudo.'
+        printf '\nSkipping making user sudo.\n'
     fi
 }
     
@@ -248,7 +250,7 @@ SetupZSH() {
                 usermod --shell $DefinedSHELL root
                 CopyZshrcFile
             else
-                printf '\nSkipping ZSH Setup.'
+                printf '\nSkipping ZSH Setup.\n'
             fi
         fi
     fi
@@ -257,7 +259,7 @@ SetupZSH() {
         chsh -s $DefinedSHELL
         CopyZshrcFile
     else
-        printf '\nSkipping zsh Setup.'
+        printf '\nSkipping zsh Setup.\n'
     fi
 }
 
@@ -273,7 +275,7 @@ CopyZshrcFile() {
                 printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."
             fi
         else
-            printf "\nSkipping zshrc file."
+            printf "\nSkipping zshrc file.\n"
         fi
     elif ! CheckForPackage zsh; then
         if ask "Would you like to copy the zshrc file included with this script to your home directory?" Y; then
@@ -284,7 +286,7 @@ CopyZshrcFile() {
                 printf "\nThe zshrc file is not in the expected path. Please run this script from inside the script directory."                
             fi
         else
-            printf "\nSkipping zshrc file."
+            printf "\nSkipping zshrc file.\n"
         fi
     fi
 }
@@ -309,7 +311,7 @@ SSHKeyGen () {
 #Copy bashrc and vimrc to home folder
 CPbashrc () {
     if IsRoot; then
-        printf '\nNOTE: You are running this script as root. The bashrc file here will be copied to the /root and /etc/skel/ directories.\n'
+        printf '\nNOTE: You are running this script as root.\nThe bashrc file here will be copied to the /root and /etc/skel/ directories.\n'
     fi
     if ask "Would you like to copy the bashrc file included with this script to your home folder?" Y; then
         if IsRoot; then
@@ -325,7 +327,7 @@ CPbashrc () {
 
 CPvimrc () {
     if IsRoot; then
-        printf '\nNOTE: You are running this script as root. The vimrc file here will be copied to the /root and /etc/skel/ directories.\n'
+        printf '\nNOTE: You are running this script as root.\nThe vimrc file here will be copied to the /root and /etc/skel/ directories.\n'
     fi
     if ask "Would you like to copy the vimrc file included with this script to your home folder?" Y; then
         if IsRoot; then
@@ -500,7 +502,8 @@ CreateYubikeyChalResp() {
     printf '\nSetting up Challenge Response Authentication\n'
     printf '\nPlease Insert your yubikey and press any key to continue.'
     read -rsn1 -p
-    printf '\nWARNING IF YOU HAVE ALREADY PROGRAMED CHALLENGE RESPONSE, THIS STEP WILL OVERWRITE YOUR EXISTING KEY WITH A NEW ONE. SKIP THIS STEP IF YOU DO NOT WANT A NEW KEY!\n'
+    printf '\nWARNING IF YOU HAVE ALREADY PROGRAMED CHALLENGE RESPONSE, THIS STEP WILL OVERWRITE YOUR EXISTING KEY WITH A NEW ONE. \
+    SKIP THIS STEP IF YOU DO NOT WANT A NEW KEY!\n'
     if ask "Would you like to program challenge reponse keys on your yubikey?" N; then
         ykpersonalize -2 -ochal-resp -ochal-hmac -ohmac-lt64 -oserial-api-visible;
         if ask "Would you like to program challenge reponse keys on another yubikey?" N; then
@@ -508,10 +511,10 @@ CreateYubikeyChalResp() {
             read -rsn1
             ykpersonalize -2 -ochal-resp -ochal-hmac -ohmac-lt64 -oserial-api-visible;
         else
-            printf "Skipping."
+            printf "Skipping.\n"
         fi
     else
-        printf "Skipping."
+        printf "Skipping.\n"
     fi
     printf '\nNow creating Yubikey Challenge Response files.\n'
     ykpamcfg -2 -v
@@ -520,7 +523,7 @@ CreateYubikeyChalResp() {
         read -rsn1
         ykpamcfg -2 -v
     else
-        printf '\nSkipping.'
+        printf '\nSkipping.\n'
     fi
 }
 #Set up Yubikey for Challange Response Authentication
@@ -574,7 +577,7 @@ VMSetup() {
             InstallPKG spice-vdagent
             check_exit_status
         else
-            printf '\nSkipping installing Spice-vdagent.'
+            printf '\nSkipping installing Spice-vdagent.\n'
         fi
     fi
     if CheckForPackage qemu-guest-agent; then
@@ -582,7 +585,7 @@ VMSetup() {
             InstallPKG qemu-guest-agent
             check_exit_status
         else
-            printf '\nSkipping installing qemu-guest-agent.'
+            printf '\nSkipping installing qemu-guest-agent.\n'
         fi
     fi
 }
@@ -595,17 +598,17 @@ InstallNordVPN() {
                 InstallPKG curl
                 check_exit_status
                 sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
-                printf '\nRun this script again as user to finish setting up NordVPN.\nPress any key to continue.'
+                printf '\nRun this script again as user to finish setting up NordVPN.\nPress any key to continue.\n'
                 read -rsn1
             else
-                '\nSkipping installing NordVPN'
+                '\nSkipping installing NordVPN,\n'
             fi
         fi
     else
         if ! IsRoot; then
             printf '\nAdding %s to nordvpn group.' "$USER"
             sudo usermod -aG nordvpn $USER
-            printf '\nReboot the computer to be able to login to NordVPN.\nPress any key to continue.'
+            printf '\nReboot the computer to be able to login to NordVPN.\nPress any key to continue.\n'
             read -rsn1
         fi
     fi
@@ -618,7 +621,7 @@ DualBootSetup() {
         if ask "Would you like to install refind?" N; then
             InstallPKG refind
         else
-            printf '\nSkipping installing refind.'
+            printf '\nSkipping installing refind.\n'
         fi
     fi
 }
@@ -628,7 +631,7 @@ check_exit_status() {
     if [ $? -eq 0 ]; then
         printf '\nSuccess\n'
     else
-        printf '\nError\nThe last command exited with an error.'
+        printf '\nError\nThe last command exited with an error.\n'
         if ask "Exit script?" N; then
             GoodBye
         else
@@ -670,11 +673,12 @@ elif ! CheckForPackage nala-legacy; then
     PKGMGR=nala
 else
     if IsRoot; then
-        printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
+        printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, \
+        and the ability to fetch faster mirrors."
         if ask "Would you like to install Nala?" N; then
             SetupNala
         else
-            printf '\nSkipping Nala Setup.'
+            printf '\nSkipping Nala Setup.\n'
         fi
     else
         PKGMGR=apt
@@ -688,7 +692,7 @@ if IsRoot; then
         if ask "Would you like to install VIM?" Y; then
             InstallPKG vim
         else
-            printf '\nSkipping VIM install'
+            printf '\nSkipping VIM install.\n'
         fi
     fi
 fi
@@ -698,7 +702,7 @@ if IsRoot; then
         if ask "Would you like to install sudo?" Y; then
             InstallPKG sudo
         else
-            printf '\nSkipping sudo setup'
+            printf '\nSkipping sudo setup.\n'
         fi
     fi
 fi
@@ -711,7 +715,7 @@ if IsRoot; then
 fi
 
 if IsRoot; then
-    printf "\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user."
+    printf "\nNOTE: You are running this script as Root, or with Sudo. The SSH Key generated will be for the root user.\n"
     if ask "Would you like to generate an SSH key?" N; then
         SSHKeyGen
     else
@@ -739,7 +743,7 @@ if IsRoot; then
     if ask "Is this system a QEMU based virtual machine?" N; then
         VMSetup
     else
-        printf '\nSkipping VM setup'
+        printf '\nSkipping VM setup.\n'
     fi
 fi
 
@@ -748,7 +752,7 @@ if IsRoot; then
     if ask "Is this system a dual boot system?" N; then
         DualBootSetup
     else
-        printf '\nSkipping DualBoot setup'
+        printf '\nSkipping DualBoot setup.\n'
     fi
 fi
 
@@ -760,14 +764,15 @@ if IsRoot; then
         CreateYubikeyChalResp
         CPYubikeyFiles
     else
-        printf "\nSkipping Yubikey setup\n"
+        printf "\nSkipping Yubikey setup.\n"
     fi
 fi
 
 #Install Recommended Apt Software
 
 if IsRoot; then
-    printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest version of something, install it from flatpak.'
+    printf '\nNOTE: depending on your distribution and sources, apt packeges may not be the latest versions available.\nIf you want the latest \
+    version of something, install it from flatpak.'
     if ask "Would you like to install apt packages?" N; then
         if ask "Would you like to install desktop apps?" N; then
             InstallAptDeskSW
@@ -776,18 +781,18 @@ if IsRoot; then
                 if ask "Would you like to install Eddy?" N; then
                     InstallEddy
                 else
-                    printf '\nSkipping Eddy.'
+                    printf '\nSkipping Eddy.\n'
                 fi
             else
                 printf '\nSkipping Eddy, already installed.\n'
             fi
         else
-            printf '\nSkipping Desktop Apps.'
+            printf '\nSkipping Desktop Apps.\n'
         fi
         if ask "Would you like to install server and CLI apps?" N; then
             InstallAptServSW
         else
-            printf '\nSkipping Server and CLI apps.'
+            printf '\nSkipping Server and CLI apps.\n'
         fi
     else
         printf "\nSkipping apt packages\n"
@@ -813,10 +818,11 @@ if ! IsRoot; then
             printf "\nSkipping Flatpak apps\n"
         fi
     else
-        printf '\nFlatpak is not installed. Skipping flatpak apps.'
+        printf '\nFlatpak is not installed. Skipping flatpak apps.\n'
     fi
 else
-    printf '\nYou are running this script as root. To install Flatpak apps, you should run this script again without root or sudo.'
+    printf '\nYou are running this script as root. To install Flatpak apps, you should run this script again without root or sudo.\n'
+    sleep 1s
 fi
 
 #Install Recommended snap packages
@@ -828,7 +834,7 @@ if IsRoot; then
             printf "\nSkipping Snap apps\n"
         fi
     else
-        printf '\nSnapd is not installed. Skipping Snap apps.'
+        printf '\nSnapd is not installed. Skipping Snap apps.\n'
     fi
 fi
 
@@ -841,11 +847,11 @@ if ask "Would you like to install Firestorm Second Life Viewer?" N; then
         if ask "Proceed?" N; then
             InstallFirestorm
         else
-           printf '\nSkipping Firestorm Installation.'
+           printf '\nSkipping Firestorm Installation.\n'
         fi
     fi
 else
-    printf '\nSkipping Firestorm Installation.'
+    printf '\nSkipping Firestorm Installation.\n'
 fi
 
 GoodBye
