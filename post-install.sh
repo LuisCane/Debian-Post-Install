@@ -585,6 +585,21 @@ VMSetup() {
             printf '\nSkipping installing qemu-guest-agent.\n'
         fi
     fi
+    if ! CheckForPackage spice-vdagent; then
+        printf "Sometimes, the VM doesn't resize automatically. If that's the case this part of the script can usually fix that."
+        if ask "Would you like to apply the resize VM fix?" N; then
+            ResizeVM
+        else
+            printf "\nSkipping Resize Fix.\n"
+}
+
+#Setup Automatic VM Resizing credit to DannyDa.
+ResizeVM () {
+    mkdir -p /usr/local/bin
+    mkdir -p /etc/udev/rules.d
+    cp ./files/x-resize /usr/local/bin/x-resize
+    cp ./files/50-x-resize.rules /etc/udev/rules.d/50-x-resize.rules
+    chmod +x /usr/local/bin/x-resize
 }
 
 #Install NordVPN
