@@ -591,14 +591,18 @@ VMSetup() {
             ResizeVM
         else
             printf "\nSkipping Resize Fix.\n"
+        fi
+    else
+        printf "\nSpice-vdagent not installed, Skipping resize VM fix.\n"
+    fi
 }
 
 #Setup Automatic VM Resizing credit to DannyDa.
 ResizeVM () {
     mkdir -p /usr/local/bin
     mkdir -p /etc/udev/rules.d
-    cp ./files/x-resize /usr/local/bin/x-resize
-    cp ./files/50-x-resize.rules /etc/udev/rules.d/50-x-resize.rules
+    cp ./resize/x-resize /usr/local/bin/x-resize
+    cp ./resize/50-x-resize.rules /etc/udev/rules.d/50-x-resize.rules
     chmod +x /usr/local/bin/x-resize
 }
 
