@@ -5,10 +5,10 @@ openssh-server
 neofetch
 tldr
 htop
+xrdp
 apache2
 php
 mariadb
 nginx
 npm
 cloud-init
-EOF
