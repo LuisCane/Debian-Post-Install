@@ -473,19 +473,6 @@ InstallSnapSW() {
     done 3< "$file"
 }
 
-#Install Firestorm Second Life Viewer
-InstallFirestorm() {
-    printf '\nPlease ensure that the download link in ./apps/firestorm is the latest version. Press any key to continue.'
-    read -rsn1
-    file='./apps/firestorm'
-    read -r url < "$file"
-    wget $url
-    tar -xvf Phoenix_Firestorm-Release_x86_64*.tar.xz
-    chmod +x Phoenix_Firestorm*/install.sh
-    ./Phoenix_Firestorm*/install.sh
-    rm -r ./Phoenix_Firestorm*
-}
-
 #Install Yubikey Packages
 InstallYubiSW() {
     printf '\nInstalling Required Packages for yubikey authentication.'
@@ -850,22 +837,6 @@ if IsRoot; then
     else
         printf '\nSnapd is not installed. Skipping Snap apps.\n'
     fi
-fi
-
-#Install Firestorm Viewer for Second Life
-if ask "Would you like to install Firestorm Second Life Viewer?" N; then
-    if IsRoot; then
-        InstallFirestorm
-    else
-        printf "\nYou are not root, installing firestorm as user will install to your home directory."
-        if ask "Proceed?" N; then
-            InstallFirestorm
-        else
-           printf '\nSkipping Firestorm Installation.\n'
-        fi
-    fi
-else
-    printf '\nSkipping Firestorm Installation.\n'
 fi
 
 GoodBye
