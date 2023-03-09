@@ -129,7 +129,6 @@ SetupNala() {
     else
         PKGMGR=nala
     fi
-    nala fetch
 }
 
 UpdateSoftware() {
@@ -672,8 +671,14 @@ export LANG=C.UTF-8
 #Setup Nala
 if ! CheckForPackage nala; then
     PKGMGR=nala
+    if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
+        nala fetch
+    fi
 elif ! CheckForPackage nala-legacy; then
     PKGMGR=nala
+    if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
+        nala fetch
+    fi
 else
     if IsRoot; then
         printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
