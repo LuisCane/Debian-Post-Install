@@ -101,22 +101,9 @@ ScriptDirCheck() {
 CheckForPackage() {
     return $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed")
 }
-#Check if Eddy is installed.
-CheckForEddy() {
-    printf "Checking for com.github.donadigo.eddy: DPKG\n"
-    DPKG_OK=$(dpkg-query -W --showformat='${Status}\n' com.github.donadigo.eddy|grep "install ok installed")
-    printf "Checking for com.github.donadigo.eddy: USR\n"
-    if [ "install ok installed" = "/usr/bin/com.github.donadigo.eddy" ] || [[ -f "/usr/bin/com.github.donadigo.eddy" ]]; then
-      return 0
-    else
-      return 1
-    fi
-}
 
 #Setup Nala as alternative package manager to Apt
 SetupNala() {
-    echo "deb http://deb.volian.org/volian/ scar main" | tee /etc/apt/sources.list.d/volian-archive-scar-unstable.list;
-    wget -qO - https://deb.volian.org/volian/scar.key | tee /etc/apt/trusted.gpg.d/volian-archive-scar-unstable.gpg > /dev/null;
     apt update;
     apt install nala;
     if [ $? -eq 100 ]; then
@@ -128,6 +115,19 @@ SetupNala() {
         fi
     else
         PKGMGR=nala
+    fi
+}
+
+nalaFetch() {
+    if ! CheckForPackage nala; then
+        PKGMGR=nala
+        if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
+            nala fetch
+        fi
+    elif ! CheckForPackage nala-legacy; then
+        PKGMGR=nala
+        if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
+            nala fetch
     fi
 }
 
@@ -382,18 +382,6 @@ InstallFlatpak() {
     else
         printf '\nSkipping %s, already installed.\n' "flatpak"
     fi
-}
-
-InstallEddy() {
-    $PKGMGR install -y wget valac libgranite-dev libpackagekit-glib2-dev libunity-dev meson ninja-build libzeitgeist-2.0-dev gettext
-    check_exit_status 
-    WORKINGDIR=$(pwd)
-    wget https://github.com/donadigo/eddy/archive/refs/tags/1.3.2.tar.gz
-    tar -xzf 1.3.2.tar.gz eddy
-    meson build ./eddy && cd build ./eddy
-    meson configure ./eddy -Dprefix=/usr
-    ninja ./eddy
-    ninja install ./eddy
 }
 
 #Install Selected desktop Apt packages
@@ -669,26 +657,15 @@ export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
 #Setup Nala
-if ! CheckForPackage nala; then
-    PKGMGR=nala
-    if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
-        nala fetch
-    fi
-elif ! CheckForPackage nala-legacy; then
-    PKGMGR=nala
-    if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
-        nala fetch
+if IsRoot; then
+    printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
+    if ask "Would you like to install Nala?" N; then
+        SetupNala
+    else
+        printf '\nSkipping Nala Setup.\n'
     fi
 else
-    if IsRoot; then
-        printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
-        if ask "Would you like to install Nala?" N; then
-            SetupNala
-        else
-            printf '\nSkipping Nala Setup.\n'
-        fi
-    else
-        PKGMGR=apt
+    PKGMGR=apt
     fi
 fi
 
