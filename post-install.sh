@@ -627,13 +627,12 @@ fi
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
-UpdateSoftware
-
 #Setup Nala
 if IsRoot; then
     if CheckForPackage nala; then
         printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
         if ask "Would you like to install Nala?" N; then
+            $PKGMGR update
             InstallPKG nala
             PKGMGR=nala
         elif ! CheckForPackage nala;
@@ -654,6 +653,8 @@ if IsRoot; then
         PKGMGR=apt
     fi
 fi
+
+UpdateSoftware
 
 if IsRoot; then
     if CheckForPackage vim; then
