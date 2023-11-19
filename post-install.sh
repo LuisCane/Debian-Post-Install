@@ -100,36 +100,7 @@ ScriptDirCheck() {
 # package is installed.
 CheckForPackage() {
     return $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed")
-}
-
-#Setup Nala as alternative package manager to Apt
-SetupNala() {
-    apt update;
-    apt install nala;
-    if [ $? -eq 100 ]; then
-        apt install nala-legacy
-        if [ $? -eq 100 ]; then
-            printf '\nNala might not be supported on your specific distribution.'
-        else
-            PKGMGR=nala
-        fi
-    else
-        PKGMGR=nala
-    fi
-}
-
-nalaFetch() {
-    if ! CheckForPackage nala; then
-        PKGMGR=nala
-        if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
-            nala fetch
-        fi
-    elif ! CheckForPackage nala-legacy; then
-        PKGMGR=nala
-        if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
-            nala fetch
-    fi
-}
+}     
 
 UpdateSoftware() {
     if IsRoot; then
@@ -656,20 +627,33 @@ fi
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
+UpdateSoftware
+
 #Setup Nala
 if IsRoot; then
-    printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
-    if ask "Would you like to install Nala?" N; then
-        SetupNala
+    if CheckForPackage nala; then
+        printf "Nala is a front-end for libapt-pkg with a variety of features such as parallel downloads, clear display of what is happening, and the ability to fetch faster mirrors."
+        if ask "Would you like to install Nala?" N; then
+            InstallPKG nala
+            PKGMGR=nala
+        elif ! CheckForPackage nala;
+            printf '\nNala is installed.\n'
+            PKGMGR=nala
+            if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
+                nala fetch
+            fi
+        else
+            printf '\nSkipping Nala Setup.\n'
+        fi
+    elif ! CheckForPackage nala; then
+        PKGMGR=nala
+        if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
+            nala fetch
+        fi
     else
-        printf '\nSkipping Nala Setup.\n'
-    fi
-else
-    PKGMGR=apt
+        PKGMGR=apt
     fi
 fi
-
-UpdateSoftware
 
 if IsRoot; then
     if CheckForPackage vim; then
@@ -759,16 +743,6 @@ if IsRoot; then
     if ask "Would you like to install apt packages?" N; then
         if ask "Would you like to install desktop apps?" N; then
             InstallAptDeskSW
-            if ! CheckForEddy; then
-                printf 'Eddy is a graphical .deb package installer built for Elementary OS and Used in PopOS.'
-                if ask "Would you like to install Eddy?" N; then
-                    InstallEddy
-                else
-                    printf '\nSkipping Eddy.\n'
-                fi
-            else
-                printf '\nSkipping Eddy, already installed.\n'
-            fi
         else
             printf '\nSkipping Desktop Apps.\n'
         fi
