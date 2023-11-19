@@ -200,10 +200,14 @@ AddUsers() {
 
 #Add Defined User to Sudo group
 MakeUserSudo() {
-    if [ CheckForPackage sudo ] && [ ask "Would you like to add this user to the sudo group?" N ]; then
-        usermod -aG sudo $definedusername
+    if CheckForPackage sudo; then
+        if ask "Would you like to add this user to the sudo group?" N ]; then
+            usermod -aG sudo $definedusername
+        else
+            printf '\nSkipping adding user to sudo group.\n'
+        fi
     else
-        printf '\nSkipping making user sudo.\n'
+        printf '\nSudo not installed, skipping adding user to sudo group.\n'
     fi
 }
     
@@ -562,7 +566,7 @@ InstallNordVPN() {
                 printf '\nRun this script again as user to finish setting up NordVPN.\nPress any key to continue.\n'
                 read -rsn1
             else
-                '\nSkipping installing NordVPN,\n'
+                printf '\nSkipping installing NordVPN,\n'
             fi
         fi
     else
