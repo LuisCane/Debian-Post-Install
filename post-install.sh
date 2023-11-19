@@ -635,7 +635,7 @@ if IsRoot; then
             $PKGMGR update
             InstallPKG nala
             PKGMGR=nala
-        elif ! CheckForPackage nala;
+        elif ! CheckForPackage nala; then
             printf '\nNala is installed.\n'
             PKGMGR=nala
             if ask "Would you like to run Nala Fetch (for Ubuntu/Debian) to find the fastest mirrors?" Y; then
