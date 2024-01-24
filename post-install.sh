@@ -423,6 +423,18 @@ InstallFlatpakSW() {
     done 3< "$file"
 }
 
+#Install Discord Deb
+InstallDiscord() {
+    if ask "Would you like to install Discord(DEB)?" Y; then
+        printf '\nDownloading Discord deb package.\n'
+        wget "https://discord.com/api/download?platform=linux&format=deb"
+        printf '\nInstalling Discord.\n'
+        dpkg -i ./discord-*.deb
+    else
+        printf '\nSkipping Installing Discord (DEB).\n'
+    fi
+}
+
 #Install Selected Snap packages
 InstallSnapSW() {
     file='./apps/snap-apps'
@@ -760,6 +772,17 @@ if IsRoot; then
         printf "\nSkipping apt packages\n"
     fi
 fi
+
+#Install Discord DEB
+if IsRoot; then
+    if ! CheckForPackage discord; then
+        printf '\nNOTE: Discord can be installed as a deb package which requires root, or as a flatpak. If you wish to install the flatpak version of Discord, skip this step.\n'
+        InstallDiscord
+    else
+        printf '\nSkipping Discord Already Installed.\n'
+    fi
+fi
+
 
 #Remove Unnescessary Gnome Apps
 if IsRoot; then
