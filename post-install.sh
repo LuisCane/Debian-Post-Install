@@ -435,6 +435,18 @@ InstallDiscord() {
     fi
 }
 
+#Install Steam Deb
+InstallSteam() {
+    if ask "Would you like to install Steam(DEB)?" Y; then
+        printf '\nDownloading Steam deb package.\n'
+        wget "hhttps://cdn.cloudflare.steamstatic.com/client/installer/steam.deb"
+        printf '\nInstalling Steam.\n'
+        dpkg -i ./steam-latest.deb
+    else
+        printf '\nSkipping Installing Steam (DEB).\n'
+    fi
+}
+
 #Install Selected Snap packages
 InstallSnapSW() {
     file='./apps/snap-apps'
@@ -783,6 +795,15 @@ if IsRoot; then
     fi
 fi
 
+#Install Steam DEB
+if IsRoot; then
+    if ! CheckForPackage steam; then
+        printf '\nNOTE: Steam can be installed as a deb package which requires root, or as a flatpak. If you wish to install the flatpak version of Steam, skip this step.\n'
+        InstallSteam
+    else
+        printf '\nSkipping Steam Already Installed.\n'
+    fi
+fi
 
 #Remove Unnescessary Gnome Apps
 if IsRoot; then
